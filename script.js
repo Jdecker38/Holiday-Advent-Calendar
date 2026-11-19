@@ -135,33 +135,44 @@ musicButton.addEventListener('click', toggleMusic);
 dialogMusicButton.addEventListener('click', toggleMusic);
 music.addEventListener('ended', () => { musicPlaying = false; updateMusicButton(); });
 
-/** Photoshop PSD coordinate map; separate pieces stay correctly registered. */
-const RIG = [
-  {name:'body1', x:0, y:0, w:1188,h:545, file:'Train-Animation-Layers_0035_Cart-1.png'},
-  {name:'body2', x:1140,y:130,w:793,h:410,file:'Train-Animation-Layers_0034_Cart-2.png'},
-  {name:'w21',x:1288,y:442,w:166,h:167,frame:'Cart-2-Wheel-1',first:26},
-  {name:'w22',x:1617,y:442,w:166,h:167,frame:'Cart-2-Wheel-2',first:30},
-  {name:'cover2',x:1269,y:459,w:534,h:108,file:'Train-Animation-Layers_0025_Cart-2-Wheel-Covers.png'},
-  {name:'w11',x:213,y:355,w:255,h:254,frame:'Cart-1-Wheel-1',first:13},
-  {name:'w13',x:652,y:355,w:255,h:254,frame:'Cart-1-Wheel-3',first:21},
-  {name:'w12',x:448,y:375,w:215,h:214,frame:'Cart-1-Wheel-2',first:17},
-  {name:'rod', x:294,y:398,w:507,h:53,file:'Train-Animation-Layers_0012_Cart-1-Wheel-Connector.png'},
-  {name:'body3',x:1936,y:13,w:1133,h:540,file:'Train-Animation-Layers_0011_Cart-3.png'},
-  {name:'w31',x:2187,y:451,w:157,h:158,frame:'Cart-3-Wheel-1',first:3},
-  {name:'w32',x:2685,y:451,w:157,h:158,frame:'Cart-3-Wheel-2',first:7},
-  {name:'cover31',x:2186,y:421,w:172,h:124,file:'Train-Animation-Layers_0001_Cart-3-Cover-1.png'},
-  {name:'cover32',x:2678,y:425,w:172,h:124,file:'Train-Animation-Layers_0002_Cart-3-Cover-2.png'}
+/**
+ * New two-vehicle train — assets are the exact new LEGO renders supplied by the artist.
+ * The old middle tender (original Cart 2) is intentionally removed.
+ * Wagon 2 NEW.png is the renamed passenger carriage (original Cart 3).
+ * The new bodies contain stationary wheel artwork.  Only the visible lower arcs
+ * are overlaid with the prior four-frame wheel sprites, to preserve their
+ * partially hidden, behind-the-chassis look without painting over the bodies.
+ */
+const TRAIN_ASSETS = {
+  locomotive: 'Train_2026_Wagon_1.png',
+  carriage: 'Train_2026_Wagon_3.png',
+  rail: 'Train_2026_Straight_Rail.png'
+};
+const PASSENGER_OFFSET_X = 1785; // native-pixel coupling gap between the two uploads
+const PASSENGER_OFFSET_Y = 40; // native-pixel adjustment for matching wheel heights
+const TRAIN_TOTAL_WIDTH = PASSENGER_OFFSET_X + 2048;
+const TRAIN_IMAGE_HEIGHT = 905;
+const TRAIN_SCREEN_WIDTH = 1.23; // total train width relative to the phone scene
+const TRAIN_BASELINE = 0.91; // fraction of scene height; below the illustrated mountain track
+const WHEEL_RIG = [
+  // The wheel-centre coordinates below refer to the original 2048x905 PNGs.
+  // The yClip masks the wheel to the area visibly emerging below the chassis.
+  {x:650,y:691,diameter:246,clipY:701,first:13,name:'Cart-1-Wheel-1'},
+  {x:949,y:698,diameter:216,clipY:703,first:17,name:'Cart-1-Wheel-2'},
+  {x:1239,y:692,diameter:246,clipY:700,first:21,name:'Cart-1-Wheel-3'},
+  {x:PASSENGER_OFFSET_X+647,y:710+PASSENGER_OFFSET_Y,diameter:196,clipY:651+PASSENGER_OFFSET_Y,first:3,name:'Cart-3-Wheel-1'},
+  {x:PASSENGER_OFFSET_X+1347,y:710+PASSENGER_OFFSET_Y,diameter:196,clipY:651+PASSENGER_OFFSET_Y,first:7,name:'Cart-3-Wheel-2'}
 ];
 const trainImages = new Map();
-const imgNames = new Set();
-for (const item of RIG) {
-  if (item.file) imgNames.add(item.file);
-  if (item.frame) for (let i=0; i<4; i++) imgNames.add(`Train-Animation-Layers_${String(item.first+i).padStart(4,'0')}_${item.frame}_Frame-${i+1}.png`);
+const imgNames = new Set(Object.values(TRAIN_ASSETS));
+for (const item of WHEEL_RIG) {
+  for (let i=0;i<4;i++) imgNames.add(`Train-Animation-Layers_${String(item.first+i).padStart(4,'0')}_${item.name}_Frame-${i+1}.png`);
 }
 for (const filename of imgNames) {
-  const img = new Image(); img.decoding = 'async';
+  const img = new Image();
+  img.decoding = 'async';
   img.src = ASSET + filename;
-  trainImages.set(filename, img);
+  trainImages.set(filename,img);
 }
 function sizeCanvas(canvas) {
   const rect = scene.getBoundingClientRect();
@@ -173,38 +184,56 @@ function sizeCanvas(canvas) {
   ctx.setTransform(scale,0,0,scale,0,0);
   return {ctx,width:rect.width,height:rect.height};
 }
-const trainContext = trainCanvas.getContext('2d');
-const snowContext = snowCanvas.getContext('2d');
-function drawTrain(ts, delta) {
+function drawTrain(ts,delta) {
   const {ctx,width,height} = sizeCanvas(trainCanvas);
   ctx.clearRect(0,0,width,height);
   if (!overlay.hidden) return;
-  const duration = 17000;
-  if (!motionReduced.matches) trainProgress = (trainProgress + delta / duration) % 1;
-  // Train faces left, so it enters from the right and exits off the left edge.
-  const scale = width * 1.35 / 3072;
-  trainWidth = 3072 * scale;
-  trainHeight = 609 * scale;
-  trainX = width - (width + trainWidth) * trainProgress;
-  trainY = height * .84 - trainHeight;
-  const phase = Math.floor(ts / 170) % 4;
-  const couplingDX = [0,-20,0,20][phase];
-  const couplingDY = [-20,0,20,0][phase];
-  for (const piece of RIG) {
-    const filename = piece.file || `Train-Animation-Layers_${String(piece.first+phase).padStart(4,'0')}_${piece.frame}_Frame-${phase+1}.png`;
-    const img = trainImages.get(filename);
-    if (!img?.complete || !img.naturalWidth) continue;
-    const dx = piece.name === 'rod' ? couplingDX : 0;
-    const dy = piece.name === 'rod' ? couplingDY : 0;
-    ctx.drawImage(img,trainX+(piece.x+dx)*scale,trainY+(piece.y+dy)*scale,piece.w*scale,piece.h*scale);
+  const scale = width * TRAIN_SCREEN_WIDTH / TRAIN_TOTAL_WIDTH;
+  const baseline = height * TRAIN_BASELINE;
+  const rail = trainImages.get(TRAIN_ASSETS.rail);
+  // The uploaded straight rail is drawn behind the new train.
+  if (rail?.complete && rail.naturalWidth) {
+    ctx.drawImage(rail,0,baseline - 24,width,width*42/2048);
   }
-  const left = Math.max(-100, trainX);
-  const right = Math.min(width+100, trainX+trainWidth);
-  trainHotspot.style.display = (right > left) ? 'block' : 'none';
-  trainHotspot.style.left = (left / width * 100) + '%';
-  trainHotspot.style.top = ((trainY + trainHeight*.07) / height*100) + '%';
-  trainHotspot.style.width = ((right-left)/width*100) + '%';
-  trainHotspot.style.height = (trainHeight*.88 /height*100) + '%';
+  if (!motionReduced.matches) trainProgress = (trainProgress + delta/17000)%1;
+  trainWidth = TRAIN_TOTAL_WIDTH * scale;
+  trainHeight = TRAIN_IMAGE_HEIGHT * scale;
+  trainX = width - (width + trainWidth)*trainProgress;
+  trainY = baseline - trainHeight;
+  const engine = trainImages.get(TRAIN_ASSETS.locomotive);
+  const passenger = trainImages.get(TRAIN_ASSETS.carriage);
+  const drawBody = (img,x,y=0) => {
+    if (img?.complete && img.naturalWidth) {
+      ctx.drawImage(img,trainX+x*scale,trainY+y*scale,2048*scale,905*scale);
+    }
+  };
+  drawBody(engine,0);
+  drawBody(passenger,PASSENGER_OFFSET_X,PASSENGER_OFFSET_Y);
+  // Lightweight, four-frame wheel animation behind the wagon's side-skirts.
+  const phase = Math.floor(ts/175)%4;
+  for (const wheel of WHEEL_RIG) {
+    const filename=`Train-Animation-Layers_${String(wheel.first+phase).padStart(4,'0')}_${wheel.name}_Frame-${phase+1}.png`;
+    const img=trainImages.get(filename);
+    if (!img?.complete || !img.naturalWidth) continue;
+    const cx=trainX+wheel.x*scale, cy=trainY+wheel.y*scale;
+    const radius=wheel.diameter*scale/2;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx,cy,radius,0,Math.PI*2);
+    ctx.clip();
+    ctx.beginPath();
+    const carX=wheel.first<13 ? PASSENGER_OFFSET_X : 0;
+    ctx.rect(trainX+carX*scale,trainY+wheel.clipY*scale,2048*scale,(905-wheel.clipY)*scale);
+    ctx.clip();
+    ctx.drawImage(img,cx-radius,cy-radius,radius*2,radius*2);
+    ctx.restore();
+  }
+  const left=Math.max(0,trainX), right=Math.min(width,trainX+trainWidth);
+  trainHotspot.style.display=right>left?'block':'none';
+  trainHotspot.style.left=left/width*100+'%';
+  trainHotspot.style.top=Math.max(0,trainY)/height*100+'%';
+  trainHotspot.style.width=Math.max(0,right-left)/width*100+'%';
+  trainHotspot.style.height=Math.min(height-Math.max(0,trainY),trainHeight)/height*100+'%';
 }
 function resetSnow(width,height) {
   const n = Math.min(55,Math.max(25,Math.round(width/13)));
