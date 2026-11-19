@@ -17,6 +17,7 @@ const ASSET = 'assets/';
 // ==========================================
 
 const scene = document.getElementById('mountainScene');
+const experience = document.querySelector('.experience');
 const overlay = document.getElementById('chapterOverlay');
 const dialog = overlay.querySelector('.chapter-dialog');
 const dialogInner = document.getElementById('dialogInner');
@@ -25,8 +26,6 @@ const closeDialogButton = document.getElementById('closeDialog');
 const music = document.getElementById('backgroundMusic');
 const musicButton = document.getElementById('musicButton');
 const dialogMusicButton = document.getElementById('dialogMusicButton');
-const musicIcon = document.getElementById('musicIcon');
-const dialogMusicIcon = document.getElementById('dialogMusicIcon');
 
 const trainCanvas = document.getElementById('trainCanvas');
 const trainHotspot = document.getElementById('trainHotspot');
@@ -55,7 +54,9 @@ const CHAPTERS = {
   1: {
     unlocked: true,
     title: 'Chapter 1',
+    guideTitle: 'The Christmas Express',
     image: 'Chapter1Conductor.jpg',
+    imageDescription: 'The LEGO Christmas Express in a snowy landscape',
 
     story: [
       'Every Christmas, the employees of the LEGO Workshop gather for a very special tradition. Together, they board the candy fueled, Christmas express and begin their journey through the snowy landscape to the top of Mount “Julefest”.',
@@ -100,26 +101,14 @@ function openChapter(number) {
   dialogInner.replaceChildren();
 
   if (chapter.unlocked) {
-    if (number === 1) {
-      const banner = makeElement('img', 'dialog-banner');
-      banner.src = ASSET + 'AdventChapterTitle.png';
-      banner.alt = chapter.title;
-      banner.id = 'dialogHeading';
-      dialogInner.append(banner);
-    } else {
-      const heading = makeElement(
-        'h2',
-        'dialog-title',
-        chapter.title
-      );
-      heading.id = 'dialogHeading';
-      dialogInner.append(heading);
-    }
+    const heading = makeElement('h2', 'dialog-title', chapter.title);
+    heading.id = 'dialogHeading';
+    dialogInner.append(heading);
 
     if (chapter.image) {
       const picture = makeElement('img', 'story-picture');
       picture.src = ASSET + chapter.image;
-      picture.alt = 'The Christmas Express journey through the snow';
+      picture.alt = chapter.imageDescription ?? '';
       dialogInner.append(picture);
     }
 
@@ -130,23 +119,26 @@ function openChapter(number) {
     }
 
     const brief = makeElement('div', 'brief-card');
-
-    brief.append(
-      makeElement('strong', '', 'BRIEF'),
-      makeElement('p', '', chapter.brief)
-    );
+    const briefHeading = makeElement('h3', 'brief-heading');
+    const marker = makeElement('span', 'brief-marker');
+    marker.dataset.state = 'available';
+    marker.setAttribute('aria-hidden', 'true');
+    marker.append(makeElement('span', 'chapter-marker'));
+    briefHeading.append(marker, 'Build challenge');
+    brief.append(briefHeading, makeElement('p', '', chapter.brief));
 
     dialogInner.append(brief);
   } else {
     const content = makeElement('div', 'locked-content');
-    const icon = makeElement('div', 'locked-icon', '🔒');
-    icon.setAttribute('aria-hidden', 'true');
+    const marker = makeElement('span', 'locked-marker');
+    marker.setAttribute('aria-hidden', 'true');
+    marker.append(makeElement('span', 'lock-icon'));
 
-    const heading = makeElement('h2', '', chapter.title);
+    const heading = makeElement('h2', 'dialog-title', chapter.title);
     heading.id = 'dialogHeading';
 
     content.append(
-      icon,
+      marker,
       heading,
       makeElement('p', 'coming-soon', 'COMING SOON'),
       makeElement('p', '', chapter.unlockMessage)
@@ -156,6 +148,7 @@ function openChapter(number) {
   }
 
   overlay.hidden = false;
+  experience.inert = true;
   document.body.style.overflow = 'hidden';
   dialog.scrollTop = 0;
   closeDialogButton.focus();
@@ -163,15 +156,34 @@ function openChapter(number) {
 
 function closeChapter() {
   overlay.hidden = true;
+  experience.inert = false;
   document.body.style.overflow = '';
 
   if (priorFocus?.focus) priorFocus.focus();
 }
 
 document.querySelectorAll('[data-chapter]').forEach(button => {
-  button.addEventListener('click', () => {
-    openChapter(Number(button.dataset.chapter));
-  });
+  const number = Number(button.dataset.chapter);
+  const chapter = CHAPTERS[number];
+  if (!chapter) return;
+
+  button.dataset.state = chapter.unlocked ? 'available' : 'locked';
+  if (button.classList.contains('chapter-plaque')) {
+    button.setAttribute('aria-label', chapter.unlocked
+      ? `Week ${number}, open Chapter ${number}`
+      : `Week ${number}, coming soon`);
+  }
+
+  const title = button.querySelector('.guide-title');
+  if (title) {
+    title.textContent = chapter.unlocked
+      ? chapter.guideTitle ?? chapter.title
+      : 'Coming soon';
+  }
+  const note = button.querySelector('.guide-note');
+  if (note) note.hidden = !chapter.unlocked;
+
+  button.addEventListener('click', () => openChapter(number));
 });
 
 trainHotspot.addEventListener('click', () => openChapter(1));
@@ -209,41 +221,13 @@ document.addEventListener('keydown', event => {
 // ==========================================
 
 function updateMusicButton() {
-  musicButton.setAttribute(
-    'aria-pressed',
-    String(musicPlaying)
-  );
-
-  musicButton.setAttribute(
-    'aria-label',
-    musicPlaying
-      ? 'Mute Christmas music'
-      : 'Play Christmas music'
-  );
-
-  musicButton.title = musicPlaying
-    ? 'Mute Christmas music'
-    : 'Play Christmas music';
-
-  musicIcon.src = ASSET + (
-    musicPlaying
-      ? 'AdventMusicOn.png'
-      : 'AdventMusicOff.png'
-  );
-
-  dialogMusicIcon.src = musicIcon.src;
-
-  dialogMusicButton.setAttribute(
-    'aria-pressed',
-    String(musicPlaying)
-  );
-
-  dialogMusicButton.setAttribute(
-    'aria-label',
-    musicPlaying
-      ? 'Mute Christmas music'
-      : 'Play Christmas music'
-  );
+  const label = musicPlaying ? 'Mute Christmas music' : 'Play Christmas music';
+  const status = musicPlaying ? 'Music on' : 'Music off';
+  for (const button of [musicButton, dialogMusicButton]) {
+    button.setAttribute('aria-pressed', String(musicPlaying));
+    button.setAttribute('aria-label', label);
+    button.querySelector('.music-label').textContent = status;
+  }
 }
 
 async function toggleMusic() {
