@@ -1,15 +1,15 @@
 :root {
-  --night: #142746;
-  --navy: #23385c;
-  --blue: #355783;
-  --berry: #ad2447;
-  --berry-dark: #781932;
-  --gold: #ffda7a;
-  --paper: #fff9eb;
-  --ice: #e3f3ff;
-  --muted: #445775;
+  --night: #113a35;
+  --ink: #1d3a32;
+  --pine: #245d4a;
+  --berry: #a42940;
+  --berry-dark: #741c31;
+  --gold: #ffd574;
+  --paper: #fffaf0;
+  --mint: #e8f1e5;
+  --muted: #475e52;
   --star-shape: polygon(50% 0, 62% 34%, 98% 36%, 70% 59%, 79% 96%, 50% 75%, 21% 96%, 30% 59%, 2% 36%, 38% 34%);
-  font-family: "Trebuchet MS", system-ui, sans-serif;
+  font-family: system-ui, "Segoe UI", sans-serif;
   color-scheme: light;
 }
 
@@ -18,14 +18,13 @@
 body {
   margin: 0;
   min-height: 100vh;
-  color: var(--navy);
+  color: var(--ink);
   background-color: var(--night);
   background-image:
-    radial-gradient(circle at 14px 18px, #d6edff48 1px, transparent 1.75px),
-    radial-gradient(circle at 41px 35px, #f0dcac63 1.5px, transparent 2.5px),
-    radial-gradient(ellipse at 10% 9%, #386682, transparent 65%),
-    radial-gradient(ellipse at 87% 100%, #493b70, transparent 68%);
-  background-size: 79px 83px, 127px 101px, auto, auto;
+    radial-gradient(circle at 14px 18px, #e4f3e432 1px, transparent 1.8px),
+    radial-gradient(ellipse at 10% 9%, #315f52, transparent 65%),
+    linear-gradient(145deg, transparent 30%, #182a37);
+  background-size: 83px 89px, auto, auto;
 }
 
 button {
@@ -57,10 +56,10 @@ button:focus-visible {
 .scene-card {
   min-width: 0;
   overflow: hidden;
-  border: 4px solid #cee8fa;
-  border-top-color: #f6fcff;
+  border: 3px solid #cbdccc;
+  border-top-color: #f2f2dd;
   border-radius: 1.35rem;
-  box-shadow: 0 0 0 2px #152443, 0 1rem 2.75rem #101b3c85;
+  box-shadow: 0 0 0 2px #18362e, 0 1rem 2.75rem #0e262875;
 }
 
 .mountain-scene {
@@ -138,7 +137,7 @@ button:focus-visible {
   border-radius: .7em .7em 1.2em 1.2em;
   color: white;
   background: var(--berry);
-  box-shadow: inset 0 1px #ffffff70, 0 4px 12px #10234372;
+  box-shadow: inset 0 1px #ffffff55, 0 4px 12px #142e305e;
   font-size: clamp(1.19rem, 3.3vw, 1.7rem);
   font-weight: 900;
   line-height: 1.12;
@@ -159,32 +158,8 @@ button:focus-visible {
 
 .scene-title::after { rotate: 16deg; }
 
-.mountain-scene::before, .mountain-scene::after {
-  --ornament: #ec6a83;
-  --ornament-edge: #852841;
-  content: "";
-  position: absolute;
-  inset: 0 auto auto 4.5%;
-  z-index: 7;
-  width: 1.25rem;
-  height: 2.75rem;
-  background:
-    linear-gradient(#fff1c4, #fff1c4) top / 2px calc(100% - 1.3rem) no-repeat,
-    linear-gradient(#ffe6a0, #bd7d37) bottom 1.04rem center / .5rem .36rem no-repeat,
-    radial-gradient(circle at 33% 33%, #fff9, transparent 25%) bottom center / 1.25rem 1.25rem no-repeat,
-    radial-gradient(circle closest-side, var(--ornament) 87%, var(--ornament-edge) 91% 98%, transparent) bottom center / 1.25rem 1.25rem no-repeat;
-  pointer-events: none;
-}
-
-.mountain-scene::after {
-  --ornament: #ffcd63;
-  --ornament-edge: #a96a28;
-  inset: 0 4.5% auto auto;
-  height: 3.35rem;
-}
-
 .chapter-plaque, .control-button, .guide-card {
-  box-shadow: 0 3px 7px #15274636;
+  box-shadow: 0 3px 7px #1d3a322c;
   transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
 }
 
@@ -213,11 +188,11 @@ button:focus-visible {
   min-width: max(8.1rem, 39%);
   min-height: 44px;
   padding: .4rem .75rem;
-  border: 2px solid var(--blue);
+  border: 2px solid #b1ceba;
   border-radius: 2rem;
-  color: var(--navy);
-  background: var(--ice);
-  box-shadow: inset 0 2px #fff, 0 3px 7px #15274655;
+  color: #fffdf4;
+  background: var(--pine);
+  box-shadow: inset 0 1px #ffffff30, 0 3px 7px #182e3155;
   font-size: 1.05rem;
   font-weight: 800;
   white-space: nowrap;
@@ -229,7 +204,7 @@ button:focus-visible {
   background: var(--gold);
 }
 
-.chapter-plaque[data-state="locked"]:hover { background: #f5fbff; }
+.chapter-plaque[data-state="locked"]:hover { background: #317158; }
 .chapter-plaque[data-state="available"]:hover { background: #ffe8a6; }
 .week-one { top: 71.5%; translate: -50% -100%; }
 .week-two { top: 52%; }
@@ -275,16 +250,16 @@ button:focus-visible {
   gap: .375rem;
   min-height: 44px;
   padding: .35rem .75rem;
-  border: 2px solid #abc7e1;
+  border: 2px solid #adc4b6;
   border-radius: 2rem;
-  color: var(--navy);
-  background: #f8fcff;
+  color: var(--ink);
+  background: #fcfdf6;
   font-size: .875rem;
   line-height: 1.2;
   font-weight: 800;
 }
 
-.control-button:hover { background: var(--ice); }
+.control-button:hover { background: var(--mint); }
 
 .scene-music {
   position: absolute;
@@ -342,11 +317,11 @@ button:focus-visible {
   position: relative;
   min-width: 0;
   padding: clamp(1.25rem, 3vw, 2.25rem);
-  padding-top: clamp(2.7rem, 5vw, 3.75rem);
-  border: 3px solid #cce6fc;
-  border-radius: 1.5rem;
-  background: linear-gradient(158deg, #fffdf9, var(--paper) 66%, #edf8ff);
-  box-shadow: 0 0 0 2px #233b66, 0 1rem 2.75rem #101b3c70;
+  padding-top: clamp(2.7rem, 5vw, 3.05rem);
+  border: 2px solid #d7d9bd;
+  border-radius: 1.3rem;
+  background: var(--paper);
+  box-shadow: 0 1rem 2.75rem #112d2a67;
 }
 
 .festival-lights {
@@ -357,22 +332,22 @@ button:focus-visible {
   display: flex;
   justify-content: space-around;
   height: 1.9rem;
-  border-bottom: 2px solid #385374;
+  border-bottom: 1px solid #707b61;
   border-radius: 0 0 50% 50% / 0 0 50% 50%;
   pointer-events: none;
 }
 
 .festival-lights span {
-  --bulb-color: #a351a3;
-  --bulb-glow: #f9a0ec;
+  --bulb-color: #92602a;
+  --bulb-glow: #f3cb79;
   position: relative;
   top: calc(100% - .1rem);
-  width: .72rem;
-  height: 1rem;
-  border: 1px solid #374879;
+  width: .63rem;
+  height: .83rem;
+  border: 1px solid var(--bulb-color);
   border-radius: 45% 45% 52% 52%;
   background: radial-gradient(circle at 36% 30%, #fff9 12%, transparent 23%), var(--bulb-glow);
-  box-shadow: 0 0 .58rem var(--bulb-glow);
+  box-shadow: 0 0 .36rem var(--bulb-glow);
 }
 
 .festival-lights span::before {
@@ -384,11 +359,13 @@ button:focus-visible {
   background: var(--bulb-color);
 }
 
-.festival-lights span:nth-child(3n + 1) { --bulb-color: #9f2b49; --bulb-glow: #ff8c9d; }
-.festival-lights span:nth-child(3n + 2) { --bulb-color: #93621f; --bulb-glow: #ffd36f; }
-.festival-lights span:nth-child(3n) { --bulb-color: #32675e; --bulb-glow: #8de1b9; }
-.festival-lights span:first-child { translate: 0 -.48rem; rotate: 14deg; }
-.festival-lights span:last-child { translate: 0 -.48rem; rotate: -14deg; }
+.festival-lights span:nth-child(2), .festival-lights span:nth-last-child(2) {
+  --bulb-color: #9e3f46;
+  --bulb-glow: #ef9c9c;
+}
+.festival-lights span:nth-child(3) { --bulb-color: #43755f; --bulb-glow: #a7cfad; }
+.festival-lights span:first-child { translate: 0 -.33rem; rotate: 14deg; }
+.festival-lights span:last-child { translate: 0 -.33rem; rotate: -14deg; }
 .festival-lights span:nth-child(2) { translate: 0 -.18rem; rotate: 7deg; }
 .festival-lights span:nth-last-child(2) { translate: 0 -.18rem; rotate: -7deg; }
 
@@ -403,9 +380,9 @@ button:focus-visible {
 
 .adventure-panel h2 {
   margin: 0;
-  color: var(--navy);
-  font-size: clamp(2.125rem, 4vw, 3.3rem);
-  font-weight: 800;
+  color: var(--ink);
+  font-size: clamp(2.125rem, 3.8vw, 3.25rem);
+  font-weight: 850;
   line-height: 1.02;
   letter-spacing: -.045em;
 }
@@ -413,7 +390,6 @@ button:focus-visible {
 .adventure-panel h2 span {
   display: block;
   color: var(--berry);
-  text-shadow: 1px 2px #ffe5b8;
 }
 
 .lead {
@@ -437,10 +413,10 @@ button:focus-visible {
   gap: .5rem;
   min-height: 4.25rem;
   padding: .7rem .75rem;
-  border: 2px solid #a9c9e4;
+  border: 1px solid #b6cdbb;
   border-radius: 1rem;
-  color: var(--navy);
-  background: var(--ice);
+  color: var(--ink);
+  background: var(--mint);
   text-align: left;
 }
 
@@ -451,10 +427,10 @@ button:focus-visible {
   border-color: #ce8f3a;
   color: #562a24;
   background-color: var(--gold);
-  background-image: radial-gradient(circle at 95% 5%, #fff4cb, transparent 45%);
+  background-image: radial-gradient(circle at 95% 5%, #fff0c166, transparent 45%);
 }
 
-.guide-card[data-state="locked"]:hover { background-color: #f3faff; }
+.guide-card[data-state="locked"]:hover { background-color: #f1f5e9; }
 .guide-card[data-state="available"]:hover { background-color: #ffe4a3; }
 .guide-text { display: grid; gap: .2rem; }
 .guide-week { font-size: .875rem; font-weight: 850; }
@@ -469,7 +445,7 @@ button:focus-visible {
   aspect-ratio: 1;
   border-radius: 50%;
   color: #fff;
-  background: var(--blue);
+  background: var(--pine);
 }
 
 [data-state="available"] .guide-marker, .brief-marker {
@@ -491,7 +467,7 @@ button:focus-visible {
 .overlay-backdrop {
   position: absolute;
   inset: 0;
-  background: #152443cc;
+  background: #112e2bd4;
   backdrop-filter: blur(7px);
 }
 
@@ -501,11 +477,11 @@ button:focus-visible {
   max-height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
-  border: 3px solid #cce6fc;
+  border: 2px solid #d7d9bd;
   border-radius: 1.25rem;
-  color: var(--navy);
+  color: var(--ink);
   background: var(--paper);
-  box-shadow: 0 0 0 2px #233b66, 0 1.25rem 4rem #101b3c88;
+  box-shadow: 0 1.25rem 4rem #112a2b88;
 }
 
 .chapter-dialog:focus { outline: none; }
@@ -520,10 +496,10 @@ button:focus-visible {
   align-items: center;
   gap: .5rem;
   padding: 1rem clamp(.75rem, 4vw, 1.5rem) .85rem;
-  border-bottom: 1px solid #b7d1eb;
+  border-bottom: 1px solid #c4d4c5;
   background:
-    repeating-linear-gradient(135deg, var(--berry) 0 9px, #fff4e6 9px 18px) top / 100% .35rem no-repeat,
-    var(--ice);
+    repeating-linear-gradient(135deg, var(--berry) 0 8px, #fff4e6 8px 16px) top / 100% .24rem no-repeat,
+    var(--mint);
 }
 
 .dialog-back {
@@ -537,7 +513,7 @@ button:focus-visible {
 
 .dialog-title {
   margin: 0 0 .8rem;
-  color: var(--navy);
+  color: var(--ink);
   font-size: clamp(1.8rem, 5vw, 2.5rem);
   font-weight: 900;
   line-height: 1.08;
@@ -552,13 +528,13 @@ button:focus-visible {
   margin: 0 0 1rem;
   border: .3rem solid #fff;
   border-radius: .7rem;
-  outline: 1px solid #b7d1eb;
-  background: var(--ice);
+  outline: 1px solid #c4d4c5;
+  background: var(--mint);
 }
 
 .story-text {
   margin: 0 0 .8rem;
-  color: var(--navy);
+  color: var(--ink);
   font-size: 1rem;
   line-height: 1.55;
 }
@@ -566,7 +542,7 @@ button:focus-visible {
 .brief-card {
   margin: 1.25rem 0 .25rem;
   padding: 1rem;
-  border: 2px dashed #c89239;
+  border: 1px solid #c89548;
   border-radius: 1rem;
   color: #562a24;
   background: #fff0c4;
@@ -589,9 +565,9 @@ button:focus-visible {
   justify-items: center;
   gap: .6rem;
   padding: clamp(1.5rem, 7vw, 3rem) .75rem;
-  border: 2px solid #b7d1eb;
+  border: 1px solid #c4d4c5;
   border-radius: 1rem;
-  background: var(--ice);
+  background: var(--mint);
   text-align: center;
 }
 
