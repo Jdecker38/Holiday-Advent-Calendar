@@ -136,105 +136,167 @@ dialogMusicButton.addEventListener('click', toggleMusic);
 music.addEventListener('ended', () => { musicPlaying = false; updateMusicButton(); });
 
 /**
- * New two-vehicle train — assets are the exact new LEGO renders supplied by the artist.
- * The old middle tender (original Cart 2) is intentionally removed.
- * Wagon 2 NEW.png is the renamed passenger carriage (original Cart 3).
- * The new bodies contain stationary wheel artwork.  Only the visible lower arcs
- * are overlaid with the prior four-frame wheel sprites, to preserve their
- * partially hidden, behind-the-chassis look without painting over the bodies.
+ * Holiday Advent Calendar — corrected TWO-vehicle LEGO train.
+ * Draw order (back -> front):
+ *   1. Straight rail
+ *   2. Locomotive and passenger-carriage artwork
+ *   3. Animated wheel PNGs
+ *   4. Wheel covers/side-skirts (existing cover PNGs + matching body detail)
+ *
+ * The locomotive cover is restored from its new blue-render body; the
+ * passenger wheels get their existing two separate black bogie-cover PNGs.
+ * All these assets are already uploaded to GitHub.
+ * Old middle tender (Cart 2) is removed.
  */
 const TRAIN_ASSETS = {
   locomotive: 'Train_2026_Wagon_1.png',
-  carriage: 'Train_2026_Wagon_3.png',
-  rail: 'Train_2026_Straight_Rail.png'
+  carriage: 'Train_2026_Wagon_2.png', // Corrected passenger render uploaded to GitHub
+  rail: 'Train_2026_Straight_Rail.png',
+  passengerCover1: 'Train-Animation-Layers_0001_Cart-3-Cover-1.png',
+  passengerCover2: 'Train-Animation-Layers_0002_Cart-3-Cover-2.png'
 };
-const PASSENGER_OFFSET_X = 1785; // native-pixel coupling gap between the two uploads
-const PASSENGER_OFFSET_Y = 40; // native-pixel adjustment for matching wheel heights
-const TRAIN_TOTAL_WIDTH = PASSENGER_OFFSET_X + 2048;
-const TRAIN_IMAGE_HEIGHT = 905;
-const TRAIN_SCREEN_WIDTH = 1.23; // total train width relative to the phone scene
-const TRAIN_BASELINE = 0.91; // fraction of scene height; below the illustrated mountain track
+
+// Corrected source-image sizes (pixels), rather than the OLD 2048 x 905 canvases.
+const ENGINE_W = 1188;
+const ENGINE_H = 598;
+const CARRIAGE_W = 1141;
+const CARRIAGE_H = 594;
+const PASSENGER_OFFSET_X = 1034;
+const PASSENGER_OFFSET_Y = 4;
+const TRAIN_TOTAL_WIDTH = Math.max(ENGINE_W, PASSENGER_OFFSET_X + CARRIAGE_W);
+const TRAIN_IMAGE_HEIGHT = Math.max(ENGINE_H, PASSENGER_OFFSET_Y + CARRIAGE_H);
+const TRAIN_SCREEN_WIDTH = 1.15;
+const TRAIN_BASELINE = 0.905;
+const TRAIN_TRAVEL_MS = 17000;
+
+// Wheel anchor points are LOCAL to each of the corrected PNGs.
+// The 4-frame sprites already exist in your GitHub assets folder.
 const WHEEL_RIG = [
-  // The wheel-centre coordinates below refer to the original 2048x905 PNGs.
-  // The yClip masks the wheel to the area visibly emerging below the chassis.
-  {x:650,y:691,diameter:246,clipY:701,first:13,name:'Cart-1-Wheel-1'},
-  {x:949,y:698,diameter:216,clipY:703,first:17,name:'Cart-1-Wheel-2'},
-  {x:1239,y:692,diameter:246,clipY:700,first:21,name:'Cart-1-Wheel-3'},
-  {x:PASSENGER_OFFSET_X+647,y:710+PASSENGER_OFFSET_Y,diameter:196,clipY:651+PASSENGER_OFFSET_Y,first:3,name:'Cart-3-Wheel-1'},
-  {x:PASSENGER_OFFSET_X+1347,y:710+PASSENGER_OFFSET_Y,diameter:196,clipY:651+PASSENGER_OFFSET_Y,first:7,name:'Cart-3-Wheel-2'}
+  {vehicle:'engine', x:366, y:514, diameter:164, first:13, name:'Cart-1-Wheel-1'},
+  {vehicle:'engine', x:568, y:515, diameter:147, first:17, name:'Cart-1-Wheel-2'},
+  {vehicle:'engine', x:770, y:514, diameter:164, first:21, name:'Cart-1-Wheel-3'},
+  {vehicle:'carriage', x:335, y:520, diameter:147, first:3, name:'Cart-3-Wheel-1'},
+  {vehicle:'carriage', x:801, y:520, diameter:147, first:7, name:'Cart-3-Wheel-2'}
 ];
+
 const trainImages = new Map();
 const imgNames = new Set(Object.values(TRAIN_ASSETS));
-for (const item of WHEEL_RIG) {
-  for (let i=0;i<4;i++) imgNames.add(`Train-Animation-Layers_${String(item.first+i).padStart(4,'0')}_${item.name}_Frame-${i+1}.png`);
+for (const wheel of WHEEL_RIG) {
+  for (let phase = 0; phase < 4; phase++) {
+    imgNames.add(`Train-Animation-Layers_${String(wheel.first + phase).padStart(4, '0')}_${wheel.name}_Frame-${phase + 1}.png`);
+  }
 }
 for (const filename of imgNames) {
-  const img = new Image();
-  img.decoding = 'async';
-  img.src = ASSET + filename;
-  trainImages.set(filename,img);
+  const image = new Image();
+  image.decoding = 'async';
+  image.src = ASSET + filename;
+  trainImages.set(filename, image);
 }
+function loadedTrainImage(filename) {
+  const image = trainImages.get(filename);
+  return image && image.complete && image.naturalWidth ? image : null;
+}
+
 function sizeCanvas(canvas) {
   const rect = scene.getBoundingClientRect();
   const scale = Math.min(window.devicePixelRatio || 1, 2);
-  const w = Math.max(1,Math.round(rect.width*scale));
-  const h = Math.max(1,Math.round(rect.height*scale));
-  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+  const w = Math.max(1, Math.round(rect.width * scale));
+  const h = Math.max(1, Math.round(rect.height * scale));
+  if (canvas.width !== w || canvas.height !== h) {
+    canvas.width = w;
+    canvas.height = h;
+  }
   const ctx = canvas.getContext('2d');
-  ctx.setTransform(scale,0,0,scale,0,0);
-  return {ctx,width:rect.width,height:rect.height};
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  return {ctx, width:rect.width, height:rect.height};
 }
-function drawTrain(ts,delta) {
-  const {ctx,width,height} = sizeCanvas(trainCanvas);
-  ctx.clearRect(0,0,width,height);
+
+function drawTrain(ts, delta) {
+  const {ctx, width, height} = sizeCanvas(trainCanvas);
+  ctx.clearRect(0, 0, width, height);
   if (!overlay.hidden) return;
+
   const scale = width * TRAIN_SCREEN_WIDTH / TRAIN_TOTAL_WIDTH;
   const baseline = height * TRAIN_BASELINE;
-  const rail = trainImages.get(TRAIN_ASSETS.rail);
-  // The uploaded straight rail is drawn behind the new train.
-  if (rail?.complete && rail.naturalWidth) {
-    ctx.drawImage(rail,0,baseline - 24,width,width*42/2048);
+
+  // Layer 1 — straight LEGO rails (behind the locomotive and carriage).
+  const rail = loadedTrainImage(TRAIN_ASSETS.rail);
+  if (rail) {
+    const railHeight = width * (rail.naturalHeight / rail.naturalWidth);
+    ctx.drawImage(rail, 0, baseline - railHeight * 0.55, width, railHeight);
   }
-  if (!motionReduced.matches) trainProgress = (trainProgress + delta/17000)%1;
+
+  if (!motionReduced.matches) {
+    trainProgress = (trainProgress + delta / TRAIN_TRAVEL_MS) % 1;
+  }
   trainWidth = TRAIN_TOTAL_WIDTH * scale;
   trainHeight = TRAIN_IMAGE_HEIGHT * scale;
-  trainX = width - (width + trainWidth)*trainProgress;
+  trainX = width - (width + trainWidth) * trainProgress;
   trainY = baseline - trainHeight;
-  const engine = trainImages.get(TRAIN_ASSETS.locomotive);
-  const passenger = trainImages.get(TRAIN_ASSETS.carriage);
-  const drawBody = (img,x,y=0) => {
-    if (img?.complete && img.naturalWidth) {
-      ctx.drawImage(img,trainX+x*scale,trainY+y*scale,2048*scale,905*scale);
-    }
-  };
-  drawBody(engine,0);
-  drawBody(passenger,PASSENGER_OFFSET_X,PASSENGER_OFFSET_Y);
-  // Lightweight, four-frame wheel animation behind the wagon's side-skirts.
-  const phase = Math.floor(ts/175)%4;
+
+  const engine = loadedTrainImage(TRAIN_ASSETS.locomotive);
+  const carriage = loadedTrainImage(TRAIN_ASSETS.carriage);
+  const bodyX = (vehicle) => trainX + (vehicle === 'carriage' ? PASSENGER_OFFSET_X : 0) * scale;
+  const bodyY = (vehicle) => trainY + (vehicle === 'carriage' ? PASSENGER_OFFSET_Y : 0) * scale;
+
+  // Layer 2 — FULL new cart render images.
+  // Wheels will be painted over these images in the next pass.
+  if (engine) ctx.drawImage(engine, bodyX('engine'), bodyY('engine'), ENGINE_W * scale, ENGINE_H * scale);
+  if (carriage) ctx.drawImage(carriage, bodyX('carriage'), bodyY('carriage'), CARRIAGE_W * scale, CARRIAGE_H * scale);
+
+  // Layer 3 — FIVE animated wheels, IN FRONT of the bodies.
+  const phase = Math.floor(ts / 175) % 4;
   for (const wheel of WHEEL_RIG) {
-    const filename=`Train-Animation-Layers_${String(wheel.first+phase).padStart(4,'0')}_${wheel.name}_Frame-${phase+1}.png`;
-    const img=trainImages.get(filename);
-    if (!img?.complete || !img.naturalWidth) continue;
-    const cx=trainX+wheel.x*scale, cy=trainY+wheel.y*scale;
-    const radius=wheel.diameter*scale/2;
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx,cy,radius,0,Math.PI*2);
-    ctx.clip();
-    ctx.beginPath();
-    const carX=wheel.first<13 ? PASSENGER_OFFSET_X : 0;
-    ctx.rect(trainX+carX*scale,trainY+wheel.clipY*scale,2048*scale,(905-wheel.clipY)*scale);
-    ctx.clip();
-    ctx.drawImage(img,cx-radius,cy-radius,radius*2,radius*2);
-    ctx.restore();
+    const filename = `Train-Animation-Layers_${String(wheel.first + phase).padStart(4, '0')}_${wheel.name}_Frame-${phase + 1}.png`;
+    const image = loadedTrainImage(filename);
+    if (!image) continue;
+    const radius = wheel.diameter * scale / 2;
+    const centerX = bodyX(wheel.vehicle) + wheel.x * scale;
+    const centerY = bodyY(wheel.vehicle) + wheel.y * scale;
+    ctx.drawImage(image, centerX - radius, centerY - radius, 2 * radius, 2 * radius);
   }
-  const left=Math.max(0,trainX), right=Math.min(width,trainX+trainWidth);
-  trainHotspot.style.display=right>left?'block':'none';
-  trainHotspot.style.left=left/width*100+'%';
-  trainHotspot.style.top=Math.max(0,trainY)/height*100+'%';
-  trainHotspot.style.width=Math.max(0,right-left)/width*100+'%';
-  trainHotspot.style.height=Math.min(height-Math.max(0,trainY),trainHeight)/height*100+'%';
+
+  // Layer 4 — WHEEL COVERS (ON TOP of the animated wheels).
+  // Re-render the original wheel-skirt regions from the SAME cart art.
+  // This hides wheel sections that should sit behind the black chassis,
+  // without needing mismatched cover graphics from the old green train.
+  function drawWheelCover(bodyImage, vehicle, sourceWidth, top, bottom) {
+    if (!bodyImage) return;
+    const coverHeight = bottom - top;
+    ctx.drawImage(
+      bodyImage, 0, top, sourceWidth, coverHeight,
+      bodyX(vehicle), bodyY(vehicle) + top * scale,
+      sourceWidth * scale, coverHeight * scale
+    );
+  }
+  drawWheelCover(engine, 'engine', ENGINE_W, 432, 529);
+  drawWheelCover(carriage, 'carriage', CARRIAGE_W, 402, 491);
+
+  // Final top layer: the two separately exported bogie/wheel-cover parts
+  // from the passenger carriage. They sit ABOVE both animated wheels.
+  const bogieCover1 = loadedTrainImage(TRAIN_ASSETS.passengerCover1);
+  const bogieCover2 = loadedTrainImage(TRAIN_ASSETS.passengerCover2);
+  if (bogieCover1) {
+    ctx.drawImage(bogieCover1,
+      bodyX('carriage') + 249 * scale, bodyY('carriage') + 422 * scale,
+      172 * scale, 124 * scale);
+  }
+  if (bogieCover2) {
+    ctx.drawImage(bogieCover2,
+      bodyX('carriage') + 715 * scale, bodyY('carriage') + 422 * scale,
+      172 * scale, 124 * scale);
+  }
+
+  // Keep the clickable hotspot following the complete moving train.
+  const left = Math.max(0, trainX);
+  const right = Math.min(width, trainX + trainWidth);
+  trainHotspot.style.display = right > left ? 'block' : 'none';
+  trainHotspot.style.left = left / width * 100 + '%';
+  trainHotspot.style.top = Math.max(0, trainY) / height * 100 + '%';
+  trainHotspot.style.width = Math.max(0, right - left) / width * 100 + '%';
+  trainHotspot.style.height = Math.max(0, Math.min(height - Math.max(0, trainY), trainHeight)) / height * 100 + '%';
 }
+
 function resetSnow(width,height) {
   const n = Math.min(55,Math.max(25,Math.round(width/13)));
   snow = Array.from({length:n}, (_,i)=>({
