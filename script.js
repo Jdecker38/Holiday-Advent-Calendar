@@ -1,13 +1,20 @@
 
 /**
- * Advent Calendar 2026
- * Mobile-first website.
- * Original Illustrator mountain is unchanged.
+ * HOLIDAY ADVENT CALENDAR 2026
+ * Complete Website Script
+ *
+ * Train: 1 locomotive + 2 matching passenger carriages
+ * Animation loop: 22 seconds
+ * All original graphics and chapter interactions preserved
  */
 
 'use strict';
 
 const ASSET = 'assets/';
+
+// ==========================================
+// WEBSITE ELEMENTS
+// ==========================================
 
 const scene = document.getElementById('mountainScene');
 const overlay = document.getElementById('chapterOverlay');
@@ -33,15 +40,12 @@ const motionReduced = window.matchMedia(
 let priorFocus = null;
 let lastTimestamp = 0;
 let trainProgress = 0;
-
 let trainX = 0;
 let trainY = 0;
 let trainWidth = 0;
 let trainHeight = 0;
-
 let snow = [];
 let musicPlaying = false;
-
 
 // ==========================================
 // CHAPTER INFORMATION
@@ -75,7 +79,6 @@ const CHAPTERS = {
   }
 };
 
-
 // ==========================================
 // CHAPTER CONTROLS
 // ==========================================
@@ -83,62 +86,40 @@ const CHAPTERS = {
 function makeElement(tag, className, text) {
   const elem = document.createElement(tag);
 
-  if (className) {
-    elem.className = className;
-  }
-
-  if (text) {
-    elem.textContent = text;
-  }
+  if (className) elem.className = className;
+  if (text) elem.textContent = text;
 
   return elem;
 }
 
-
 function openChapter(number) {
   const chapter = CHAPTERS[number];
-
   if (!chapter) return;
 
   priorFocus = document.activeElement;
   dialogInner.replaceChildren();
 
   if (chapter.unlocked) {
-
     if (number === 1) {
-      const banner = makeElement(
-        'img',
-        'dialog-banner'
-      );
-
+      const banner = makeElement('img', 'dialog-banner');
       banner.src = ASSET + 'AdventChapterTitle.png';
       banner.alt = chapter.title;
       banner.id = 'dialogHeading';
-
       dialogInner.append(banner);
-
     } else {
-
       const heading = makeElement(
         'h2',
         'dialog-title',
         chapter.title
       );
-
       heading.id = 'dialogHeading';
       dialogInner.append(heading);
     }
 
     if (chapter.image) {
-      const picture = makeElement(
-        'img',
-        'story-picture'
-      );
-
+      const picture = makeElement('img', 'story-picture');
       picture.src = ASSET + chapter.image;
-      picture.alt =
-        'The Christmas Express journey through the snow';
-
+      picture.alt = 'The Christmas Express journey through the snow';
       dialogInner.append(picture);
     }
 
@@ -148,60 +129,27 @@ function openChapter(number) {
       );
     }
 
-    const brief = makeElement(
-      'div',
-      'brief-card'
-    );
-
-    const heading = makeElement(
-      'strong',
-      '',
-      'BRIEF'
-    );
+    const brief = makeElement('div', 'brief-card');
 
     brief.append(
-      heading,
+      makeElement('strong', '', 'BRIEF'),
       makeElement('p', '', chapter.brief)
     );
 
     dialogInner.append(brief);
-
   } else {
-
-    const content = makeElement(
-      'div',
-      'locked-content'
-    );
-
-    const icon = makeElement(
-      'div',
-      'locked-icon',
-      '🔒'
-    );
-
+    const content = makeElement('div', 'locked-content');
+    const icon = makeElement('div', 'locked-icon', '🔒');
     icon.setAttribute('aria-hidden', 'true');
 
-    const heading = makeElement(
-      'h2',
-      '',
-      chapter.title
-    );
-
+    const heading = makeElement('h2', '', chapter.title);
     heading.id = 'dialogHeading';
 
     content.append(
       icon,
       heading,
-      makeElement(
-        'p',
-        'coming-soon',
-        'COMING SOON'
-      ),
-      makeElement(
-        'p',
-        '',
-        chapter.unlockMessage
-      )
+      makeElement('p', 'coming-soon', 'COMING SOON'),
+      makeElement('p', '', chapter.unlockMessage)
     );
 
     dialogInner.append(content);
@@ -209,39 +157,25 @@ function openChapter(number) {
 
   overlay.hidden = false;
   document.body.style.overflow = 'hidden';
-
   dialog.scrollTop = 0;
   closeDialogButton.focus();
 }
-
 
 function closeChapter() {
   overlay.hidden = true;
   document.body.style.overflow = '';
 
-  if (priorFocus?.focus) {
-    priorFocus.focus();
-  }
+  if (priorFocus?.focus) priorFocus.focus();
 }
 
+document.querySelectorAll('[data-chapter]').forEach(button => {
+  button.addEventListener('click', () => {
+    openChapter(Number(button.dataset.chapter));
+  });
+});
 
-document.querySelectorAll('[data-chapter]').forEach(
-  button => {
-    button.addEventListener('click', () => {
-      openChapter(Number(button.dataset.chapter));
-    });
-  }
-);
-
-trainHotspot.addEventListener(
-  'click',
-  () => openChapter(1)
-);
-
-closeDialogButton.addEventListener(
-  'click',
-  closeChapter
-);
+trainHotspot.addEventListener('click', () => openChapter(1));
+closeDialogButton.addEventListener('click', closeChapter);
 
 overlay.querySelector('[data-close]').addEventListener(
   'click',
@@ -251,9 +185,7 @@ overlay.querySelector('[data-close]').addEventListener(
 document.addEventListener('keydown', event => {
   if (overlay.hidden) return;
 
-  if (event.key === 'Escape') {
-    closeChapter();
-  }
+  if (event.key === 'Escape') closeChapter();
 
   if (event.key === 'Tab') {
     const items = [
@@ -261,28 +193,22 @@ document.addEventListener('keydown', event => {
       dialogMusicButton
     ];
 
-    const current = items.indexOf(
-      document.activeElement
-    );
-
+    const current = items.indexOf(document.activeElement);
     const direction = event.shiftKey ? -1 : 1;
 
     event.preventDefault();
 
     items[
-      (current + direction + items.length) %
-      items.length
+      (current + direction + items.length) % items.length
     ].focus();
   }
 });
-
 
 // ==========================================
 // CHRISTMAS MUSIC
 // ==========================================
 
 function updateMusicButton() {
-
   musicButton.setAttribute(
     'aria-pressed',
     String(musicPlaying)
@@ -320,9 +246,7 @@ function updateMusicButton() {
   );
 }
 
-
 async function toggleMusic() {
-
   if (musicPlaying) {
     music.pause();
     musicPlaying = false;
@@ -333,59 +257,49 @@ async function toggleMusic() {
   try {
     await music.play();
     musicPlaying = true;
-
   } catch (error) {
     musicPlaying = false;
-    console.warn(
-      'Music could not play:',
-      error
-    );
+    console.warn('Music could not play:', error);
   }
 
   updateMusicButton();
 }
 
-
-musicButton.addEventListener(
-  'click',
-  toggleMusic
-);
-
-dialogMusicButton.addEventListener(
-  'click',
-  toggleMusic
-);
+musicButton.addEventListener('click', toggleMusic);
+dialogMusicButton.addEventListener('click', toggleMusic);
 
 music.addEventListener('ended', () => {
   musicPlaying = false;
   updateMusicButton();
 });
 
-
 // ==========================================
-// LEGO TRAIN ASSETS
+// TRAIN CONFIGURATION
 // ==========================================
 
-// Photoshop order, bottom to top:
-//
-// 1. New Cart 1 and New Cart 2
-// 2. Cart 2 Wheel 1
-// 3. Cart 2 Wheel 2
-// 4. Cart 2 Wheel Covers
-// 5. Cart 1 Wheel 1
-// 6. Cart 1 Wheel 3
-// 7. Cart 1 Wheel 2
-// 8. Cart 1 Wheel Connector
-//
-// The train's original reference image
-// is NOT drawn over the animated layers.
+/*
+ * TRAIN STRUCTURE:
+ *
+ * CART 1: Blue locomotive
+ * CART 2: Brown passenger carriage
+ * CART 3: Copy of Cart 2
+ *
+ * Drawing order:
+ *
+ * 1. LEGO rails
+ * 2. All train bodies
+ * 3. Passenger carriage wheels
+ * 4. Passenger carriage wheel covers
+ * 5. Locomotive wheels
+ * 6. Locomotive connecting rod
+ *
+ * Same wheel animation for both passenger
+ * carriages, but rendered independently.
+ */
 
 const TRAIN_ASSETS = {
-
   locomotive: 'Train_2026_Wagon_1.png',
-
   carriage: 'Train_2026_Wagon_2.png',
-
   rail: 'Train_2026_Straight_Rail.png',
 
   carriageWheelCover:
@@ -395,12 +309,9 @@ const TRAIN_ASSETS = {
     'Train-Animation-Layers_0012_Cart-1-Wheel-Connector.png'
 };
 
-
 // ==========================================
-// TRAIN DIMENSIONS
+// TRAIN SIZE AND POSITION
 // ==========================================
-
-// Corrected PNG image dimensions.
 
 const ENGINE_W = 1188;
 const ENGINE_H = 598;
@@ -408,14 +319,22 @@ const ENGINE_H = 598;
 const CARRIAGE_W = 1141;
 const CARRIAGE_H = 594;
 
-// Distance between the two vehicles.
-
+// Position of the first passenger carriage.
 const PASSENGER_OFFSET_X = 1034;
 const PASSENGER_OFFSET_Y = 4;
 
+// Distance between passenger carriages.
+const CARRIAGE_STEP_X = 1030;
+
+// Both passenger carriage locations.
+const CARRIAGE_POSITIONS = [
+  PASSENGER_OFFSET_X,
+  PASSENGER_OFFSET_X + CARRIAGE_STEP_X
+];
+
 const TRAIN_TOTAL_WIDTH = Math.max(
   ENGINE_W,
-  PASSENGER_OFFSET_X + CARRIAGE_W
+  CARRIAGE_POSITIONS[1] + CARRIAGE_W
 );
 
 const TRAIN_IMAGE_HEIGHT = Math.max(
@@ -423,30 +342,28 @@ const TRAIN_IMAGE_HEIGHT = Math.max(
   PASSENGER_OFFSET_Y + CARRIAGE_H
 );
 
-// Adjust these if you want to change
-// the size or height of the entire train.
+// Keep the individual carriages the same
+// size as the working two-vehicle version.
+const ORIGINAL_TWO_CAR_WIDTH =
+  PASSENGER_OFFSET_X + CARRIAGE_W;
 
+// Change this to adjust train size.
 const TRAIN_SCREEN_WIDTH = 1.15;
+
+// Change this to adjust train height.
 const TRAIN_BASELINE = 0.905;
 
-// Train takes 17 seconds to travel off-screen.
-
-const TRAIN_TRAVEL_MS = 17000;
-
+// COMPLETE ANIMATION LOOP:
+// Previous = 17000 milliseconds
+// Updated  = 22000 milliseconds
+const TRAIN_TRAVEL_MS = 22000;
 
 // ==========================================
-// WHEEL LAYER POSITIONS
+// LOCOMOTIVE WHEELS
 // ==========================================
 
-// Coordinates are relative to each cart PNG.
-// x/y = top-left corner of each wheel layer.
-
-const WHEEL_RIG = [
-
-  // CART 1 - LOCOMOTIVE
-
+const ENGINE_WHEELS = [
   {
-    vehicle: 'engine',
     x: 239,
     y: 354,
     w: 255,
@@ -454,9 +371,7 @@ const WHEEL_RIG = [
     first: 13,
     name: 'Cart-1-Wheel-1'
   },
-
   {
-    vehicle: 'engine',
     x: 651,
     y: 354,
     w: 255,
@@ -464,21 +379,22 @@ const WHEEL_RIG = [
     first: 21,
     name: 'Cart-1-Wheel-3'
   },
-
   {
-    vehicle: 'engine',
     x: 466,
     y: 374,
     w: 215,
     h: 214,
     first: 17,
     name: 'Cart-1-Wheel-2'
-  },
+  }
+];
 
-  // CART 2 - PASSENGER CARRIAGE
+// ==========================================
+// PASSENGER CARRIAGE WHEELS
+// ==========================================
 
+const CARRIAGE_WHEELS = [
   {
-    vehicle: 'carriage',
     x: 252,
     y: 436,
     w: 166,
@@ -486,9 +402,7 @@ const WHEEL_RIG = [
     first: 26,
     name: 'Cart-2-Wheel-1'
   },
-
   {
-    vehicle: 'carriage',
     x: 714,
     y: 436,
     w: 166,
@@ -496,12 +410,9 @@ const WHEEL_RIG = [
     first: 30,
     name: 'Cart-2-Wheel-2'
   }
-
 ];
 
-
-// CART 2 WHEEL COVER
-
+// Passenger wheel cover positioning.
 const CARRIAGE_WHEEL_COVER = {
   x: 304,
   y: 399,
@@ -509,9 +420,7 @@ const CARRIAGE_WHEEL_COVER = {
   h: 108
 };
 
-
-// CART 1 CONNECTING ROD
-
+// Locomotive connecting rod positioning.
 const ENGINE_CONNECTOR = {
   x: 333,
   y: 455,
@@ -519,91 +428,73 @@ const ENGINE_CONNECTOR = {
   h: 50
 };
 
-
 // ==========================================
 // LOAD TRAIN IMAGES
 // ==========================================
 
 const trainImages = new Map();
+const filenames = new Set(Object.values(TRAIN_ASSETS));
 
-const imgNames = new Set(
-  Object.values(TRAIN_ASSETS)
-);
-
-for (const wheel of WHEEL_RIG) {
-
+for (const wheel of [
+  ...ENGINE_WHEELS,
+  ...CARRIAGE_WHEELS
+]) {
   for (let phase = 0; phase < 4; phase++) {
-
-    const filename =
+    filenames.add(
       `Train-Animation-Layers_${String(
         wheel.first + phase
-      ).padStart(4, '0')}_${wheel.name}_Frame-${phase + 1}.png`;
-
-    imgNames.add(filename);
+      ).padStart(4, '0')}_${wheel.name}_Frame-${phase + 1}.png`
+    );
   }
 }
 
-
-for (const filename of imgNames) {
-
+for (const filename of filenames) {
   const image = new Image();
-
   image.decoding = 'async';
   image.src = ASSET + filename;
-
   trainImages.set(filename, image);
 }
 
-
 function loadedTrainImage(filename) {
-
   const image = trainImages.get(filename);
 
-  return image &&
-    image.complete &&
-    image.naturalWidth
-      ? image
-      : null;
+  return image && image.complete && image.naturalWidth
+    ? image
+    : null;
 }
 
-
 // ==========================================
-// CANVAS SIZE
+// CANVAS SETUP
 // ==========================================
 
 function sizeCanvas(canvas) {
-
   const rect = scene.getBoundingClientRect();
 
-  const scale = Math.min(
+  const pixelRatio = Math.min(
     window.devicePixelRatio || 1,
     2
   );
 
-  const width = Math.max(
+  const canvasWidth = Math.max(
     1,
-    Math.round(rect.width * scale)
+    Math.round(rect.width * pixelRatio)
   );
 
-  const height = Math.max(
+  const canvasHeight = Math.max(
     1,
-    Math.round(rect.height * scale)
+    Math.round(rect.height * pixelRatio)
   );
 
   if (
-    canvas.width !== width ||
-    canvas.height !== height
+    canvas.width !== canvasWidth ||
+    canvas.height !== canvasHeight
   ) {
-
-    canvas.width = width;
-    canvas.height = height;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
   }
 
   const ctx = canvas.getContext('2d');
-
-  ctx.setTransform(
-    scale, 0, 0, scale, 0, 0
-  );
+  ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 
   return {
     ctx,
@@ -612,43 +503,35 @@ function sizeCanvas(canvas) {
   };
 }
 
-
 // ==========================================
 // DRAW ANIMATED TRAIN
 // ==========================================
 
 function drawTrain(timestamp, delta) {
-
   const { ctx, width, height } =
     sizeCanvas(trainCanvas);
 
-  ctx.clearRect(
-    0, 0, width, height
-  );
+  ctx.clearRect(0, 0, width, height);
 
   if (!overlay.hidden) return;
 
+  // Same visual scale as the previous
+  // working two-vehicle train.
   const scale =
     width * TRAIN_SCREEN_WIDTH /
-    TRAIN_TOTAL_WIDTH;
+    ORIGINAL_TWO_CAR_WIDTH;
 
-  const baseline =
-    height * TRAIN_BASELINE;
-
+  const baseline = height * TRAIN_BASELINE;
 
   // ========================================
-  // LAYER 1 - STRAIGHT LEGO RAIL
+  // LAYER 1: STRAIGHT RAILS
   // ========================================
 
-  const rail = loadedTrainImage(
-    TRAIN_ASSETS.rail
-  );
+  const rail = loadedTrainImage(TRAIN_ASSETS.rail);
 
   if (rail) {
-
     const railHeight =
-      width *
-      (rail.naturalHeight / rail.naturalWidth);
+      width * (rail.naturalHeight / rail.naturalWidth);
 
     ctx.drawImage(
       rail,
@@ -659,32 +542,23 @@ function drawTrain(timestamp, delta) {
     );
   }
 
-
   // ========================================
-  // HORIZONTAL TRAIN MOVEMENT
+  // MOVE TRAIN RIGHT TO LEFT
   // ========================================
 
   if (!motionReduced.matches) {
-
     trainProgress = (
-      trainProgress +
-      delta / TRAIN_TRAVEL_MS
+      trainProgress + delta / TRAIN_TRAVEL_MS
     ) % 1;
   }
 
-  trainWidth =
-    TRAIN_TOTAL_WIDTH * scale;
-
-  trainHeight =
-    TRAIN_IMAGE_HEIGHT * scale;
+  trainWidth = TRAIN_TOTAL_WIDTH * scale;
+  trainHeight = TRAIN_IMAGE_HEIGHT * scale;
 
   trainX =
-    width -
-    (width + trainWidth) * trainProgress;
+    width - (width + trainWidth) * trainProgress;
 
-  trainY =
-    baseline - trainHeight;
-
+  trainY = baseline - trainHeight;
 
   const engine = loadedTrainImage(
     TRAIN_ASSETS.locomotive
@@ -694,254 +568,168 @@ function drawTrain(timestamp, delta) {
     TRAIN_ASSETS.carriage
   );
 
+  const engineX = trainX;
+  const engineY = trainY;
 
-  function bodyX(vehicle) {
+  const carriageY =
+    trainY + PASSENGER_OFFSET_Y * scale;
 
-    return trainX + (
-      vehicle === 'carriage'
-        ? PASSENGER_OFFSET_X
-        : 0
-    ) * scale;
+  function carriageX(offset) {
+    return trainX + offset * scale;
   }
-
-
-  function bodyY(vehicle) {
-
-    return trainY + (
-      vehicle === 'carriage'
-        ? PASSENGER_OFFSET_Y
-        : 0
-    ) * scale;
-  }
-
 
   // ========================================
-  // LAYER 2 - CART BODY IMAGES
+  // LAYER 2: ALL TRAIN BODIES
   // ========================================
 
   if (engine) {
-
     ctx.drawImage(
       engine,
-      bodyX('engine'),
-      bodyY('engine'),
+      engineX,
+      engineY,
       ENGINE_W * scale,
       ENGINE_H * scale
     );
   }
 
-
+  // Draw passenger carriage 1 AND 2.
+  // Both use the same image.
   if (carriage) {
-
-    ctx.drawImage(
-      carriage,
-      bodyX('carriage'),
-      bodyY('carriage'),
-      CARRIAGE_W * scale,
-      CARRIAGE_H * scale
-    );
+    for (const offset of CARRIAGE_POSITIONS) {
+      ctx.drawImage(
+        carriage,
+        carriageX(offset),
+        carriageY,
+        CARRIAGE_W * scale,
+        CARRIAGE_H * scale
+      );
+    }
   }
 
-
-  // All wheels and the connector use
-  // the same 4-frame animation phase.
-
-  const phase =
-    Math.floor(timestamp / 175) % 4;
-
-
   // ========================================
-  // LAYER 3 - CART 2 WHEELS
+  // ANIMATION PHASE
   // ========================================
 
-  for (
-    const wheel of WHEEL_RIG.filter(
-      wheel => wheel.vehicle === 'carriage'
-    )
-  ) {
+  // All wheels animate together.
+  const phase = Math.floor(timestamp / 175) % 4;
 
+  function getWheelImage(wheel) {
     const filename =
       `Train-Animation-Layers_${String(
         wheel.first + phase
       ).padStart(4, '0')}_${wheel.name}_Frame-${phase + 1}.png`;
 
-    const image =
-      loadedTrainImage(filename);
+    return loadedTrainImage(filename);
+  }
 
-    if (!image) continue;
+  // ========================================
+  // LAYER 3: BOTH PASSENGER WHEEL SETS
+  // ========================================
+
+  const cover = loadedTrainImage(
+    TRAIN_ASSETS.carriageWheelCover
+  );
+
+  // Repeat wheel animation for BOTH carriages.
+  for (const offset of CARRIAGE_POSITIONS) {
+    const x = carriageX(offset);
+
+    // Wheels go above each carriage body.
+    for (const wheel of CARRIAGE_WHEELS) {
+      const wheelImage = getWheelImage(wheel);
+      if (!wheelImage) continue;
+
+      ctx.drawImage(
+        wheelImage,
+        x + wheel.x * scale,
+        carriageY + wheel.y * scale,
+        wheel.w * scale,
+        wheel.h * scale
+      );
+    }
+
+    // ======================================
+    // LAYER 4: WHEEL COVERS
+    // ======================================
+
+    // Wheel cover is above the wheels.
+    if (cover) {
+      ctx.drawImage(
+        cover,
+        x + CARRIAGE_WHEEL_COVER.x * scale,
+        carriageY + CARRIAGE_WHEEL_COVER.y * scale,
+        CARRIAGE_WHEEL_COVER.w * scale,
+        CARRIAGE_WHEEL_COVER.h * scale
+      );
+    }
+  }
+
+  // ========================================
+  // LAYER 5: LOCOMOTIVE WHEELS
+  // ========================================
+
+  for (const wheel of ENGINE_WHEELS) {
+    const wheelImage = getWheelImage(wheel);
+    if (!wheelImage) continue;
 
     ctx.drawImage(
-      image,
-
-      bodyX('carriage') +
-        wheel.x * scale,
-
-      bodyY('carriage') +
-        wheel.y * scale,
-
+      wheelImage,
+      engineX + wheel.x * scale,
+      engineY + wheel.y * scale,
       wheel.w * scale,
       wheel.h * scale
     );
   }
 
-
   // ========================================
-  // LAYER 4 - CART 2 WHEEL COVERS
-  // ========================================
-
-  const carriageWheelCover =
-    loadedTrainImage(
-      TRAIN_ASSETS.carriageWheelCover
-    );
-
-  if (carriageWheelCover) {
-
-    ctx.drawImage(
-      carriageWheelCover,
-
-      bodyX('carriage') +
-        CARRIAGE_WHEEL_COVER.x * scale,
-
-      bodyY('carriage') +
-        CARRIAGE_WHEEL_COVER.y * scale,
-
-      CARRIAGE_WHEEL_COVER.w * scale,
-      CARRIAGE_WHEEL_COVER.h * scale
-    );
-  }
-
-
-  // ========================================
-  // LAYER 5 - CART 1 WHEELS
+  // LAYER 6: LOCOMOTIVE CONNECTING ROD
   // ========================================
 
-  for (
-    const wheel of WHEEL_RIG.filter(
-      wheel => wheel.vehicle === 'engine'
-    )
-  ) {
+  const connector = loadedTrainImage(
+    TRAIN_ASSETS.engineConnector
+  );
 
-    const filename =
-      `Train-Animation-Layers_${String(
-        wheel.first + phase
-      ).padStart(4, '0')}_${wheel.name}_Frame-${phase + 1}.png`;
-
-    const image =
-      loadedTrainImage(filename);
-
-    if (!image) continue;
-
-    ctx.drawImage(
-      image,
-
-      bodyX('engine') +
-        wheel.x * scale,
-
-      bodyY('engine') +
-        wheel.y * scale,
-
-      wheel.w * scale,
-      wheel.h * scale
-    );
-  }
-
-
-  // ========================================
-  // LAYER 6 - CART 1 WHEEL CONNECTOR
-  // ========================================
-
-  // This is the long metal coupling rod
-  // connecting the locomotive's 3 wheels.
-  //
-  // It is drawn in FRONT of the wheels.
-  //
-  // It follows a simple 4-phase circular
-  // movement synchronized with wheel frames.
-
-  const engineConnector =
-    loadedTrainImage(
-      TRAIN_ASSETS.engineConnector
-    );
-
-  if (engineConnector) {
-
-    const connectorShift = [
-
+  if (connector) {
+    const shift = [
       { x: 0, y: -15 },
-
       { x: -15, y: 0 },
-
       { x: 0, y: 15 },
-
       { x: 15, y: 0 }
-
     ][phase];
 
-
-    const connectorX =
-      bodyX('engine') +
-      (
-        ENGINE_CONNECTOR.x +
-        connectorShift.x
-      ) * scale;
-
-
-    const connectorY =
-      bodyY('engine') +
-      (
-        ENGINE_CONNECTOR.y +
-        connectorShift.y
-      ) * scale;
-
-
+    // Metal rod stays on top of the wheels.
     ctx.drawImage(
-      engineConnector,
+      connector,
 
-      connectorX,
-      connectorY,
+      engineX +
+        (ENGINE_CONNECTOR.x + shift.x) * scale,
+
+      engineY +
+        (ENGINE_CONNECTOR.y + shift.y) * scale,
 
       ENGINE_CONNECTOR.w * scale,
       ENGINE_CONNECTOR.h * scale
     );
   }
 
-
   // ========================================
   // CLICKABLE TRAIN AREA
   // ========================================
 
-  const left = Math.max(
-    0,
-    trainX
-  );
-
-  const right = Math.min(
-    width,
-    trainX + trainWidth
-  );
-
+  const left = Math.max(0, trainX);
+  const right = Math.min(width, trainX + trainWidth);
 
   trainHotspot.style.display =
-    right > left
-      ? 'block'
-      : 'none';
-
+    right > left ? 'block' : 'none';
 
   trainHotspot.style.left =
     left / width * 100 + '%';
 
-
   trainHotspot.style.top =
-    Math.max(0, trainY) /
-    height * 100 + '%';
-
+    Math.max(0, trainY) / height * 100 + '%';
 
   trainHotspot.style.width =
-    Math.max(
-      0,
-      right - left
-    ) / width * 100 + '%';
-
+    Math.max(0, right - left) / width * 100 + '%';
 
   trainHotspot.style.height =
     Math.max(
@@ -953,25 +741,19 @@ function drawTrain(timestamp, delta) {
     ) / height * 100 + '%';
 }
 
-
 // ==========================================
 // SNOW ANIMATION
 // ==========================================
 
 function resetSnow(width, height) {
-
   const count = Math.min(
     55,
-    Math.max(
-      25,
-      Math.round(width / 13)
-    )
+    Math.max(25, Math.round(width / 13))
   );
 
   snow = Array.from(
     { length: count },
     (_, index) => ({
-
       x:
         ((index * 0.618033988749895) % 1) *
         width,
@@ -985,73 +767,43 @@ function resetSnow(width, height) {
           ? 2.3
           : 0.9 + (index % 4) * 0.21,
 
-      speed:
-        10 + (index * 19) % 35,
+      speed: 10 + (index * 19) % 35,
 
-      sway:
-        (index % 7 - 3) * 0.65,
+      sway: (index % 7 - 3) * 0.65,
 
-      opacity:
-        0.25 + (index % 6) * 0.1
-
+      opacity: 0.25 + (index % 6) * 0.1
     })
   );
 }
 
-
 let lastSnowWidth = 0;
 
-
 function drawSnow(delta) {
-
   const { ctx, width, height } =
     sizeCanvas(snowCanvas);
 
-  ctx.clearRect(
-    0, 0, width, height
-  );
-
+  ctx.clearRect(0, 0, width, height);
 
   if (lastSnowWidth !== width) {
-
     resetSnow(width, height);
-
     lastSnowWidth = width;
   }
 
-
   if (!overlay.hidden) return;
 
-
   for (const flake of snow) {
-
     if (!motionReduced.matches) {
-
-      flake.y +=
-        flake.speed * delta / 1000;
-
-      flake.x +=
-        flake.sway * delta / 1000;
-
+      flake.y += flake.speed * delta / 1000;
+      flake.x += flake.sway * delta / 1000;
 
       if (flake.y > height + 4) {
-
         flake.y = -4;
-
-        flake.x =
-          Math.random() * width;
+        flake.x = Math.random() * width;
       }
 
-
-      if (flake.x < 0) {
-        flake.x += width;
-      }
-
-      if (flake.x > width) {
-        flake.x -= width;
-      }
+      if (flake.x < 0) flake.x += width;
+      if (flake.x > width) flake.x -= width;
     }
-
 
     ctx.fillStyle =
       `rgba(255,255,255,${flake.opacity})`;
@@ -1068,9 +820,7 @@ function drawSnow(delta) {
 
     ctx.fill();
 
-
     if (flake.r > 2) {
-
       ctx.lineWidth = 1;
 
       ctx.strokeStyle =
@@ -1078,34 +828,16 @@ function drawSnow(delta) {
 
       ctx.beginPath();
 
-      ctx.moveTo(
-        flake.x - 4,
-        flake.y
-      );
-
-      ctx.lineTo(
-        flake.x + 4,
-        flake.y
-      );
-
-      ctx.moveTo(
-        flake.x,
-        flake.y - 4
-      );
-
-      ctx.lineTo(
-        flake.x,
-        flake.y + 4
-      );
+      ctx.moveTo(flake.x - 4, flake.y);
+      ctx.lineTo(flake.x + 4, flake.y);
 
       ctx.stroke();
     }
   }
 }
 
-
 // ==========================================
-// STAR SHINE ANIMATION
+// STAR SHINE
 // ==========================================
 
 const starFrames = [
@@ -1118,13 +850,11 @@ const starFrames = [
 let lastStarFrame = -1;
 let animationId;
 
-
 // ==========================================
 // MAIN ANIMATION LOOP
 // ==========================================
 
 function frame(timestamp) {
-
   const delta = Math.min(
     timestamp - (lastTimestamp || timestamp),
     60
@@ -1132,15 +862,11 @@ function frame(timestamp) {
 
   lastTimestamp = timestamp;
 
-
   if (!motionReduced.matches) {
-
     const frameNumber =
       Math.floor(timestamp / 950) % 4;
 
-
     if (frameNumber !== lastStarFrame) {
-
       starGlow.src =
         ASSET + starFrames[frameNumber];
 
@@ -1148,44 +874,24 @@ function frame(timestamp) {
     }
   }
 
-
   drawSnow(delta);
+  drawTrain(timestamp, delta);
 
-  drawTrain(
-    timestamp,
-    delta
-  );
-
-
-  animationId =
-    requestAnimationFrame(frame);
+  animationId = requestAnimationFrame(frame);
 }
-
 
 // ==========================================
 // PAGE EVENTS
 // ==========================================
 
-window.addEventListener(
-  'pagehide',
-  () => {
+window.addEventListener('pagehide', () => {
+  cancelAnimationFrame(animationId);
+  music.pause();
+});
 
-    cancelAnimationFrame(animationId);
+window.addEventListener('visibilitychange', () => {
+  lastTimestamp = 0;
+});
 
-    music.pause();
-  }
-);
-
-
-window.addEventListener(
-  'visibilitychange',
-  () => {
-
-    lastTimestamp = 0;
-  }
-);
-
-
-// Start the animations.
-
+// Start animations.
 requestAnimationFrame(frame);
