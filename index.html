@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#4e1420" />
+  <meta name="description" content="Holiday Advent Calendar 2026 — Three chapters, one magical Christmas journey to Mount Julefest." />
+  <title>Advent Calendar 2026 · The Christmas Express</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preload" href="assets/JulefestIllustratorMobile.png" as="image" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="site-shell">
+    <main class="experience" aria-label="Holiday Advent Calendar 2026">
+      <div class="scene-card">
+        <div class="mountain-scene" id="mountainScene" aria-label="Illustrated snowy mountain with three chapters and a Christmas train">
+          <img class="scene-art" src="assets/JulefestIllustratorMobile.png" alt="Illustrated snowy mountain, pine trees, frozen pond, winding train tracks, and Christmas tree at its summit." />
+          <img class="aurora aurora-base" src="assets/JulefestAuroraSkyOverlay.png" alt="" aria-hidden="true" />
+          <img class="aurora aurora-glow" src="assets/JulefestAuroraGlowOverlay.png" alt="" aria-hidden="true" />
+          <img class="star-glow" id="starGlow" src="assets/JulefestStarShine01.png" alt="" aria-hidden="true" />
+          <canvas id="snowCanvas" class="snow-canvas" aria-hidden="true"></canvas>
+          <canvas id="trainCanvas" class="train-canvas" aria-hidden="true"></canvas>
+          <button id="trainHotspot" class="train-hotspot" aria-label="Open Chapter 1 by boarding the Christmas Express" title="Board the Christmas Express"></button>
+          <h1 class="scene-title"><img src="assets/AdventHeader.png" alt="Advent Calendar" /></h1>
+          <button class="chapter-plaque week-three" type="button" data-chapter="3" aria-label="Week 3, coming soon"><img src="assets/AdventWeek3.png" alt="Week 3, locked" /></button>
+          <button class="chapter-plaque week-two" type="button" data-chapter="2" aria-label="Week 2, coming soon"><img src="assets/AdventWeek2.png" alt="Week 2, locked" /></button>
+          <button class="chapter-plaque week-one" type="button" data-chapter="1" aria-label="Week 1, open Chapter 1"><img src="assets/AdventWeek1.png" alt="Week 1, available" /></button>
+          <div class="scene-footer">
+            <span class="footer-note">A 3-WEEK BUILDING ADVENTURE</span>
+            <button id="musicButton" class="music-button" type="button" aria-label="Play Christmas music" aria-pressed="false" title="Play Christmas music"><img id="musicIcon" src="assets/AdventMusicOff.png" alt="" /></button>
+          </div>
+        </div>
+      </div>
+      <section class="desktop-panel" aria-label="About the adventure">
+        <p class="eyebrow">THE LEGO WORKSHOP · 2026</p>
+        <h2>All aboard the<br/><em>Christmas Express.</em></h2>
+        <p class="lead">Three weeks. Three chapters. One magical journey to the top of Mount Julefest.</p>
+        <div class="rule" aria-hidden="true">✦</div>
+        <p>Follow the snowy mountain story, discover each week's challenge, and build your way toward a very special Christmas celebration.</p>
+        <div class="chapter-guide" aria-label="Chapter overview">
+          <button type="button" data-chapter="1"><span class="guide-number">01</span><span><strong>The Christmas Express</strong><small>Chapter 1 · Build your character</small></span><span class="guide-mark">✦</span></button>
+          <button type="button" data-chapter="2"><span class="guide-number">02</span><span><strong>Chapter 2</strong><small>Coming soon</small></span><span class="guide-mark">⌁</span></button>
+          <button type="button" data-chapter="3"><span class="guide-number">03</span><span><strong>Chapter 3</strong><small>Coming soon</small></span><span class="guide-mark">⌁</span></button>
+        </div>
+        <p class="desktop-footnote">Tap a chapter on the mountain or select one above. Music is optional and starts only when you press the speaker.</p>
+      </section>
+    </main>
+    <footer class="page-footer">Holiday Advent Calendar 2026 <span aria-hidden="true">✦</span> Made for a little Christmas creativity</footer>
+  </div>
+
+  <div class="chapter-overlay" id="chapterOverlay" hidden>
+    <div class="overlay-backdrop" data-close="true"></div>
+    <section class="chapter-dialog" role="dialog" aria-modal="true" aria-labelledby="dialogHeading" tabindex="-1">
+      <button type="button" id="closeDialog" class="dialog-back" aria-label="Back to the mountain"><img src="assets/AdventBackButton.png" alt="" /></button>
+      <div class="dialog-inner" id="dialogInner"></div>
+      <button id="dialogMusicButton" class="dialog-music" type="button" aria-label="Play Christmas music" aria-pressed="false" title="Toggle music"><img id="dialogMusicIcon" src="assets/AdventMusicOff.png" alt="" /></button>
+    </section>
+  </div>
+  <audio id="backgroundMusic" src="assets/JulefestSong.mp3" loop preload="none"></audio>
+</body>
+</html>
