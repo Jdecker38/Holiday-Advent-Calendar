@@ -1,5 +1,5 @@
 :root {
-  --night: #092d2c;
+  --night: #701b2b;
   --fir: #14372d;
   --green: #16664f;
   --red: #b91e32;
@@ -16,24 +16,14 @@
 * { box-sizing: border-box; }
 
 body {
-  --backdrop: url("assets/calendar-backdrop.jpg");
   margin: 0;
   min-height: 100vh;
   color: var(--ink);
-  isolation: isolate;
   background-color: var(--night);
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  z-index: -1;
-  inset: -5rem;
-  pointer-events: none;
-  background:
-    linear-gradient(#092d2c5c, #092d2c9e),
-    var(--backdrop) center / cover no-repeat;
-  filter: blur(3.25rem);
+  background-image:
+    radial-gradient(circle at 10px 10px, #ffd6d425 1px, transparent 1.5px),
+    radial-gradient(ellipse at 16% 12%, #a12d43, transparent 67%);
+  background-size: 27px 27px, auto;
 }
 
 button {
@@ -517,13 +507,6 @@ button:focus-visible {
 .coming-soon { font-weight: 850; }
 
 @media (max-width: 49rem) {
-  body { --backdrop: url("assets/calendar-backdrop-mobile.jpg"); }
-
-  body::before {
-    background-position: center, center top;
-    filter: blur(2.5rem);
-  }
-
   .experience {
     grid-template-columns: minmax(0, 32rem);
     width: min(100% - 1.5rem, 32rem);
