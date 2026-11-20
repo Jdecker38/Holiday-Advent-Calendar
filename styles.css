@@ -66,31 +66,36 @@ button:focus-visible {
   aspect-ratio: 9 / 16;
   overflow: hidden;
   isolation: isolate;
-  background:
-    radial-gradient(ellipse 115% 35% at 42% 101%, #f3fbff 97%, transparent 100%),
-    radial-gradient(ellipse 110% 37% at 80% 103%, #cbdfea 97%, transparent 100%),
-    linear-gradient(#173352, #426985 29%, #bdd9e8 62%, #e4f2f8 79%);
+  background: #dfeefa;
 }
 
-.aurora-glow, .star-glow, .snow-canvas, .train-canvas {
+.scene-art, .aurora, .star-glow, .tree-foreground, .snow-canvas, .train-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+}
+
+.scene-art {
+  z-index: 0;
+  object-fit: fill;
+  user-select: none;
   pointer-events: none;
 }
 
-.aurora-glow {
-  z-index: 2;
-  height: 40%;
-  background:
-    radial-gradient(ellipse 73% 34% at 18% -4%, transparent 50%, #79f1ae80 67%, #26bda064 79%, transparent 100%),
-    radial-gradient(ellipse 74% 35% at 73% 51%, transparent 52%, #82f5c36b 72%, #33d7bc6e 80%, transparent 100%);
-  animation: aurora-breathe 9s ease-in-out infinite alternate;
+.aurora {
+  object-fit: fill;
+  pointer-events: none;
+  user-select: none;
 }
 
-/* Santa flies behind the mountain and remains off-screen for 27 seconds
-   between crossings. */
+.aurora-base { z-index: 1; opacity: .91; }
+.aurora-glow { z-index: 2; opacity: .74; animation: aurora-breathe 9s ease-in-out infinite alternate; }
+
+/* Santa takes 9 seconds to cross, then remains entirely off-screen
+   for another 27 seconds before re-entering from the right.
+   It stays BEHIND the original illustrated Christmas tree cutout.
+   Flight layer 3 < title layer 4 < star 5 < tree foreground 6. */
 .santa-flight {
   position: absolute;
   z-index: 3;
@@ -126,26 +131,16 @@ button:focus-visible {
   to   { transform: translateY(4%); }
 }
 
-.star-glow {
+.star-glow { z-index: 5; pointer-events: none; object-fit: fill; animation: star-breathe 3.6s ease-in-out infinite alternate; }
+.tree-foreground {
+  /* Pixel-perfect transparent tree cutout; occludes Santa and title. */
   z-index: 6;
   object-fit: fill;
-  translate: -2.2% -1%;
-  animation: star-breathe 3.6s ease-in-out infinite alternate;
-}
-
-.mountain-art {
-  position: absolute;
-  z-index: 5;
-  top: 7.5%;
-  left: 0;
-  width: 100%;
-  height: auto;
   pointer-events: none;
   user-select: none;
 }
-
-.snow-canvas { z-index: 7; }
-.train-canvas { z-index: 8; }
+.snow-canvas { z-index: 7; pointer-events: none; }
+.train-canvas { z-index: 8; pointer-events: none; }
 
 .train-hotspot {
   position: absolute;
