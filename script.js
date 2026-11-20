@@ -4,7 +4,7 @@
  * Complete Website Script
  *
  * Train: 1 locomotive + 2 matching passenger carriages
- * Animation loop: 22 seconds
+ * Train: 22s crossing + 18s off-screen (40s cycle)
  * All original graphics and chapter interactions preserved
  */
 
@@ -39,6 +39,7 @@ const motionReduced = window.matchMedia(
 let priorFocus = null;
 let lastTimestamp = 0;
 let trainProgress = 0;
+let trainCycleElapsed = 0;
 let trainX = 0;
 let trainY = 0;
 let trainWidth = 0;
@@ -337,10 +338,12 @@ const TRAIN_SCREEN_WIDTH = 1.15;
 // Change this to adjust train height.
 const TRAIN_BASELINE = 0.905;
 
-// COMPLETE ANIMATION LOOP:
-// Previous = 17000 milliseconds
-// Updated  = 22000 milliseconds
+// Preserve the current train movement speed (22s from right edge to left).
+// AFTER it has cleared the left edge, hold it out of view for 18s.
+// Total cycle is 40s; changing hidden time never slows the train.
 const TRAIN_TRAVEL_MS = 22000;
+const TRAIN_HIDDEN_MS = 18000;
+const TRAIN_CYCLE_MS = TRAIN_TRAVEL_MS + TRAIN_HIDDEN_MS;
 
 // ==========================================
 // LOCOMOTIVE WHEELS
@@ -531,18 +534,25 @@ function drawTrain(timestamp, delta) {
   // ========================================
 
   if (!motionReduced.matches) {
-    trainProgress = (
-      trainProgress + delta / TRAIN_TRAVEL_MS
-    ) % 1;
+    trainCycleElapsed = (
+      trainCycleElapsed + delta
+    ) % TRAIN_CYCLE_MS;
   }
 
   trainWidth = TRAIN_TOTAL_WIDTH * scale;
   trainHeight = TRAIN_IMAGE_HEIGHT * scale;
 
-  trainX =
-    width - (width + trainWidth) * trainProgress;
-
+  // 0..1 during the 22s crossing, stays at 1 while the train is absent.
+  trainProgress = Math.min(trainCycleElapsed / TRAIN_TRAVEL_MS, 1);
+  trainX = width - (width + trainWidth) * trainProgress;
   trainY = baseline - trainHeight;
+
+  // The rail stays visible during the full 18-second off-screen pause.
+  // Do not waste drawing work or leave an invisible clickable hotspot.
+  if (trainCycleElapsed >= TRAIN_TRAVEL_MS) {
+    trainHotspot.style.display = 'none';
+    return;
+  }
 
   const engine = loadedTrainImage(
     TRAIN_ASSETS.locomotive
