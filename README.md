@@ -35,7 +35,7 @@ git push origin main
 
 ## Change artwork
 
-Replace images in `assets/` while keeping filenames. `JulefestIllustratorMobile.png` is your Illustrator mountain **unchanged**; aurora, star, and snow are independent effects, and the train canvas draws separate LEGO train PNGs.
+Replace images in `assets/` while keeping filenames. `JulefestMountain.webp` is the transparent export of the Illustrator mountain. Keep the area around the mountain transparent so the sign and Santa show around its silhouette. The aurora, star, and snow are separate effects, and the train canvas draws separate LEGO train PNGs.
 
 ## Update chapters
 
@@ -47,7 +47,9 @@ Replace `assets/JulefestSong.mp3` with your own audio file (same name). The incl
 
 ## Train animation
 
-The `RIG` map in `script.js` uses original Photoshop coordinates. To adjust the train speed, change `duration = 17000` (milliseconds). To adjust its vertical position, change the `height * .84` line. The 7 wheels use four image frames, and the coupling rod moves in sync. The train is **clickable** when on screen and opens Chapter 1.
+The locomotive pulls three matching carriages. Adjust the crossing time with `TRAIN_TRAVEL_MS` and the vertical position with `TRAIN_BASELINE` in `script.js`. The wheels use four image frames and the locomotive coupling rod moves in sync. The train is **clickable** when on screen and opens Chapter 1.
+
+Turn on **Sound** for the music and the train effects. The whistle and rolling sound start as the train approaches. The pitch drops as it passes, and the sound fades after the last carriage leaves.
 
 ## Mobile & accessibility
 

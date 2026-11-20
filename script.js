@@ -3,7 +3,7 @@
  * HOLIDAY ADVENT CALENDAR 2026
  * Complete Website Script
  *
- * Train: 1 locomotive + 2 matching passenger carriages
+ * Train: 1 locomotive + 3 matching passenger carriages
  * Train: 22s crossing + 18s off-screen (40s cycle)
  * All original graphics and chapter interactions preserved
  */
@@ -45,7 +45,7 @@ let trainY = 0;
 let trainWidth = 0;
 let trainHeight = 0;
 let snow = [];
-let musicPlaying = false;
+let soundEnabled = false;
 
 // ==========================================
 // CHAPTER INFORMATION
@@ -218,45 +218,154 @@ document.addEventListener('keydown', event => {
 });
 
 // ==========================================
-// HOLIDAY MUSIC
+// SCENE AUDIO
 // ==========================================
 
-function updateMusicButton() {
-  const label = musicPlaying ? 'Mute holiday music' : 'Play holiday music';
-  const status = musicPlaying ? 'Music on' : 'Music off';
+const TRAIN_APPROACH_MS = 3600;
+const TRAIN_FADE_OUT_MS = 2800;
+let trainAudio;
+
+function updateSoundButtons() {
+  const status = soundEnabled ? 'Sound on' : 'Sound off';
   for (const button of [musicButton, dialogMusicButton]) {
-    button.setAttribute('aria-pressed', String(musicPlaying));
-    button.setAttribute('aria-label', label);
+    button.setAttribute('aria-pressed', String(soundEnabled));
     button.querySelector('.music-label').textContent = status;
   }
 }
 
-async function toggleMusic() {
-  if (musicPlaying) {
-    music.pause();
-    musicPlaying = false;
-    updateMusicButton();
+async function loadTrainAudioBuffer(context, filename) {
+  const response = await fetch(ASSET + filename);
+  if (!response.ok) {
+    throw new Error(`${filename}: HTTP ${response.status}`);
+  }
+  return context.decodeAudioData(await response.arrayBuffer());
+}
+
+async function enableTrainAudio() {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return;
+  try {
+    if (!trainAudio) {
+      const context = new AudioContext();
+      const level = context.createGain();
+      const filter = context.createBiquadFilter();
+      const stereo = context.createStereoPanner?.();
+      level.gain.value = 0;
+      filter.type = 'lowpass';
+      if (stereo) {
+        filter.connect(stereo).connect(level);
+      } else {
+        filter.connect(level);
+      }
+      level.connect(context.destination);
+      trainAudio = { context, level, filter, stereo };
+    }
+
+    const { context, filter } = trainAudio;
+    // Resume from the sound button's user gesture before loading the clips.
+    await context.resume();
+    if (trainAudio.loading || trainAudio.rolling) return;
+    trainAudio.loading = true;
+    try {
+      const [rollingBuffer, whistleBuffer] = await Promise.all([
+        loadTrainAudioBuffer(context, 'train-rolling.mp3'),
+        loadTrainAudioBuffer(context, 'train-whistle.mp3')
+      ]);
+      const rolling = context.createBufferSource();
+      rolling.buffer = rollingBuffer;
+      rolling.loop = true;
+      rolling.connect(filter);
+      rolling.start();
+      trainAudio.rolling = rolling;
+      trainAudio.whistleBuffer = whistleBuffer;
+    } finally {
+      trainAudio.loading = false;
+    }
+  } catch (error) {
+    console.warn('Train sound could not play:', error);
+  }
+}
+
+function silenceTrainAudio() {
+  if (!trainAudio?.audible) return;
+  const { context, level, whistle } = trainAudio;
+  level.gain.setTargetAtTime(0, context.currentTime, 0.025);
+  trainAudio.audible = false;
+  if (whistle) {
+    whistle.stop(context.currentTime + 0.12);
+    trainAudio.whistle = null;
+  }
+}
+
+function updateTrainAudio() {
+  const audio = trainAudio;
+  if (!audio?.rolling || !soundEnabled || document.hidden ||
+      !overlay.hidden || motionReduced.matches) {
+    silenceTrainAudio();
     return;
   }
 
-  try {
-    await music.play();
-    musicPlaying = true;
-  } catch (error) {
-    musicPlaying = false;
-    console.warn('Music could not play:', error);
+  // Use the same crossing clock and scale as the canvas, extending the
+  // motion beyond either edge so the train can be heard off-screen.
+  const elapsed = trainCycleElapsed >= TRAIN_CYCLE_MS - TRAIN_APPROACH_MS
+    ? trainCycleElapsed - TRAIN_CYCLE_MS
+    : trainCycleElapsed;
+
+  if (elapsed < -1700 || elapsed > 900) audio.whistled = false;
+  if (elapsed >= TRAIN_TRAVEL_MS + TRAIN_FADE_OUT_MS) {
+    silenceTrainAudio();
+    return;
   }
 
-  updateMusicButton();
+  const trainSpan = TRAIN_TOTAL_WIDTH * TRAIN_SCREEN_WIDTH / ORIGINAL_TWO_CAR_WIDTH;
+  const center = 1 + trainSpan / 2 - (1 + trainSpan) * elapsed / TRAIN_TRAVEL_MS;
+  const offset = center - 0.5;
+  // Listener sits beside the track at the scene center. Radial velocity
+  // goes from approaching to receding as the train passes that point.
+  const direction = offset / Math.hypot(offset, 0.42);
+  const pitch = 1 / (1 - 0.16 * direction);
+  const approach = Math.min(1, 1 + elapsed / TRAIN_APPROACH_MS);
+  const departure = Math.min(1, 1 + (TRAIN_TRAVEL_MS - elapsed) / TRAIN_FADE_OUT_MS);
+  const gain = 0.72 * approach * departure / (1 + 0.48 * offset ** 2);
+  const cutoff = 700 + 4000 / (1 + 0.7 * offset ** 2);
+  const now = audio.context.currentTime;
+
+  audio.audible = true;
+  audio.level.gain.setTargetAtTime(gain, now, 0.06);
+  audio.filter.frequency.setTargetAtTime(cutoff, now, 0.06);
+  audio.stereo?.pan.setTargetAtTime(0.85 * direction, now, 0.06);
+  audio.rolling.playbackRate.setTargetAtTime(pitch, now, 0.06);
+
+  if (!audio.whistled && elapsed >= -1700 && elapsed <= 900) {
+    const whistle = audio.context.createBufferSource();
+    whistle.buffer = audio.whistleBuffer;
+    whistle.playbackRate.value = pitch;
+    whistle.connect(audio.filter);
+    whistle.onended = () => {
+      whistle.disconnect();
+      if (audio.whistle === whistle) audio.whistle = null;
+    };
+    whistle.start();
+    audio.whistle = whistle;
+    audio.whistled = true;
+  }
+  audio.whistle?.playbackRate.setTargetAtTime(pitch, now, 0.06);
 }
 
-musicButton.addEventListener('click', toggleMusic);
-dialogMusicButton.addEventListener('click', toggleMusic);
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  updateSoundButtons();
+  if (soundEnabled) {
+    music.play().catch(error => console.warn('Music could not play:', error));
+    enableTrainAudio();
+  } else {
+    music.pause();
+    silenceTrainAudio();
+  }
+}
 
-music.addEventListener('ended', () => {
-  musicPlaying = false;
-  updateMusicButton();
-});
+musicButton.addEventListener('click', toggleSound);
+dialogMusicButton.addEventListener('click', toggleSound);
 
 // ==========================================
 // TRAIN CONFIGURATION
@@ -266,8 +375,7 @@ music.addEventListener('ended', () => {
  * TRAIN STRUCTURE:
  *
  * CART 1: Blue locomotive
- * CART 2: Brown passenger carriage
- * CART 3: Copy of Cart 2
+ * CARTS 2–4: Matching brown passenger carriages
  *
  * Drawing order:
  *
@@ -278,8 +386,7 @@ music.addEventListener('ended', () => {
  * 5. Locomotive wheels
  * 6. Locomotive connecting rod
  *
- * Same wheel animation for both passenger
- * carriages, but rendered independently.
+ * Each passenger carriage uses the same wheel animation.
  */
 
 const TRAIN_ASSETS = {
@@ -311,15 +418,15 @@ const PASSENGER_OFFSET_Y = 4;
 // Distance between passenger carriages.
 const CARRIAGE_STEP_X = 1030;
 
-// Both passenger carriage locations.
 const CARRIAGE_POSITIONS = [
   PASSENGER_OFFSET_X,
-  PASSENGER_OFFSET_X + CARRIAGE_STEP_X
+  PASSENGER_OFFSET_X + CARRIAGE_STEP_X,
+  PASSENGER_OFFSET_X + 2 * CARRIAGE_STEP_X
 ];
 
 const TRAIN_TOTAL_WIDTH = Math.max(
   ENGINE_W,
-  CARRIAGE_POSITIONS[1] + CARRIAGE_W
+  CARRIAGE_POSITIONS.at(-1) + CARRIAGE_W
 );
 
 const TRAIN_IMAGE_HEIGHT = Math.max(
@@ -338,7 +445,7 @@ const TRAIN_SCREEN_WIDTH = 1.15;
 // Change this to adjust train height.
 const TRAIN_BASELINE = 0.905;
 
-// Preserve the current train movement speed (22s from right edge to left).
+// The full train takes 22s to cross from right edge to left.
 // AFTER it has cleared the left edge, hold it out of view for 18s.
 // Total cycle is 40s; changing hidden time never slows the train.
 const TRAIN_TRAVEL_MS = 22000;
@@ -586,8 +693,6 @@ function drawTrain(timestamp, delta) {
     );
   }
 
-  // Draw passenger carriage 1 AND 2.
-  // Both use the same image.
   if (carriage) {
     for (const offset of CARRIAGE_POSITIONS) {
       ctx.drawImage(
@@ -617,14 +722,13 @@ function drawTrain(timestamp, delta) {
   }
 
   // ========================================
-  // LAYER 3: BOTH PASSENGER WHEEL SETS
+  // LAYER 3: PASSENGER WHEELS
   // ========================================
 
   const cover = loadedTrainImage(
     TRAIN_ASSETS.carriageWheelCover
   );
 
-  // Repeat wheel animation for BOTH carriages.
   for (const offset of CARRIAGE_POSITIONS) {
     const x = carriageX(offset);
 
@@ -870,6 +974,7 @@ function frame(timestamp) {
 
   drawSnow(delta);
   drawTrain(timestamp, delta);
+  updateTrainAudio();
 
   animationId = requestAnimationFrame(frame);
 }
@@ -880,12 +985,20 @@ function frame(timestamp) {
 
 window.addEventListener('pagehide', () => {
   cancelAnimationFrame(animationId);
-  music.pause();
+  if (soundEnabled) toggleSound();
 });
 
-window.addEventListener('visibilitychange', () => {
+window.addEventListener('pageshow', event => {
+  if (event.persisted) {
+    lastTimestamp = 0;
+    animationId = requestAnimationFrame(frame);
+  }
+});
+
+document.addEventListener('visibilitychange', () => {
   lastTimestamp = 0;
+  if (document.hidden) silenceTrainAudio();
 });
 
 // Start animations.
-requestAnimationFrame(frame);
+animationId = requestAnimationFrame(frame);
