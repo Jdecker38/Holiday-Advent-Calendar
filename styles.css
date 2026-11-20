@@ -66,32 +66,36 @@ button:focus-visible {
   aspect-ratio: 9 / 16;
   overflow: hidden;
   isolation: isolate;
-  background:
-    radial-gradient(ellipse 54% 2.5% at 50% 83%, #486c8838, transparent),
-    radial-gradient(ellipse 100% 26% at 64% 105%, #eff8fc 96%, transparent 100%),
-    radial-gradient(ellipse 100% 28% at 32% 105%, #d5e9f2 96%, transparent 100%),
-    linear-gradient(#173655, #355d7a 27%, #8aaec4 62%, #c8e0ed 82%);
+  background: #dfeefa;
 }
 
-.aurora-glow, .star-glow, .snow-canvas, .train-canvas {
+.scene-art, .aurora, .star-glow, .tree-foreground, .snow-canvas, .train-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+}
+
+.scene-art {
+  z-index: 0;
+  object-fit: fill;
+  user-select: none;
   pointer-events: none;
 }
 
-.aurora-glow {
-  z-index: 2;
-  height: 34%;
-  background:
-    radial-gradient(ellipse 109% 67% at 66% -34%, transparent 74%, #82f5c37a 88%, #33d7bc50 96%, transparent 112%),
-    radial-gradient(ellipse 92% 59% at 74% -22%, transparent 69%, #79f1ae55 86%, #26bda044 97%, transparent 115%);
-  animation: aurora-breathe 9s ease-in-out infinite alternate;
+.aurora {
+  object-fit: fill;
+  pointer-events: none;
+  user-select: none;
 }
 
-/* Santa flies behind the mountain and remains off-screen for 27 seconds
-   between crossings. */
+.aurora-base { z-index: 1; opacity: .91; }
+.aurora-glow { z-index: 2; opacity: .74; animation: aurora-breathe 9s ease-in-out infinite alternate; }
+
+/* Santa takes 9 seconds to cross, then remains entirely off-screen
+   for another 27 seconds before re-entering from the right.
+   It stays BEHIND the original illustrated Christmas tree cutout.
+   Flight layer 3 < title layer 4 < star 5 < tree foreground 6. */
 .santa-flight {
   position: absolute;
   z-index: 3;
@@ -127,28 +131,16 @@ button:focus-visible {
   to   { transform: translateY(4%); }
 }
 
-.star-glow {
+.star-glow { z-index: 5; pointer-events: none; object-fit: fill; animation: star-breathe 3.6s ease-in-out infinite alternate; }
+.tree-foreground {
+  /* Pixel-perfect transparent tree cutout; occludes Santa and title. */
   z-index: 6;
   object-fit: fill;
-  translate: -1.8% -.3%;
-  animation: star-breathe 3.6s ease-in-out infinite alternate;
-}
-
-.mountain-art {
-  position: absolute;
-  z-index: 5;
-  top: 7.5%;
-  left: 50%;
-  translate: -50% 0;
-  /* Fill the original 9:16 scene without stretching the illustration. */
-  width: 122%;
-  height: auto;
   pointer-events: none;
   user-select: none;
 }
-
-.snow-canvas { z-index: 7; }
-.train-canvas { z-index: 8; }
+.snow-canvas { z-index: 7; pointer-events: none; }
+.train-canvas { z-index: 8; pointer-events: none; }
 
 .train-hotspot {
   position: absolute;
