@@ -7,7 +7,7 @@
   <meta name="description" content="Holiday Advent Calendar 2026 — Three chapters, one magical holiday journey to Mount Julefest." />
   <title>Advent Calendar 2026 · The Holiday Express</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="preload" href="assets/JulefestIllustratorMobile.png" as="image" />
+  <link rel="preload" href="assets/JulefestMountain.webp" as="image" />
   <link rel="stylesheet" href="styles.css" />
   <script src="script.js" defer></script>
 </head>
@@ -15,20 +15,17 @@
   <main class="experience" aria-label="Holiday Advent Calendar 2026">
     <div class="scene-card">
       <div class="mountain-scene" id="mountainScene" aria-label="Illustrated snowy mountain with three chapters and a holiday train">
-        <img class="scene-art" src="assets/JulefestIllustratorMobile.png" alt="Illustrated snowy mountain, pine trees, frozen pond, winding train tracks, and a decorated holiday tree at its summit." />
-        <img class="aurora aurora-base" src="assets/JulefestAuroraSkyOverlay.png" alt="" aria-hidden="true" />
-        <img class="aurora aurora-glow" src="assets/JulefestAuroraGlowOverlay.png" alt="" aria-hidden="true" />
+        <div class="aurora-glow" aria-hidden="true"></div>
         <!-- Distant Santa flies from right to left across the upper sky. -->
         <div class="santa-flight" aria-hidden="true">
           <img class="santa-render" src="assets/SantaSleigh.png" alt="" decoding="async" />
         </div>
+        <h1 class="scene-title">Advent Calendar</h1>
+        <img class="mountain-art" src="assets/JulefestMountain.webp" width="1440" height="1603" alt="Illustrated snowy mountain with pine trees, a frozen pond, and a decorated holiday tree at the summit." />
         <img class="star-glow" id="starGlow" src="assets/JulefestStarShine01.png" alt="" aria-hidden="true" />
         <canvas id="snowCanvas" class="snow-canvas" aria-hidden="true"></canvas>
         <canvas id="trainCanvas" class="train-canvas" aria-hidden="true"></canvas>
         <button type="button" id="trainHotspot" class="train-hotspot" aria-label="Open Chapter 1 by boarding the Holiday Express" title="Board the Holiday Express"></button>
-        <h1 class="scene-title">Advent Calendar</h1>
-        <!-- Transparent tree/star cutout; visually overlays the Advent Calendar sign. -->
-        <img class="tree-foreground" src="assets/JulefestTreeForeground.png" alt="" aria-hidden="true" decoding="async" />
         <button class="chapter-plaque week-one" type="button" data-chapter="1" data-state="available" aria-label="Week 1, open Chapter 1">
           <span class="chapter-marker" aria-hidden="true"></span>Week 1
         </button>
@@ -38,8 +35,8 @@
         <button class="chapter-plaque week-three" type="button" data-chapter="3" data-state="locked" aria-label="Week 3, coming soon">
           <span class="chapter-marker" aria-hidden="true"></span>Week 3
         </button>
-        <button id="musicButton" class="control-button music-button scene-music" type="button" aria-label="Play holiday music" aria-pressed="false">
-          <span class="speaker-icon" aria-hidden="true"></span><span class="music-label" aria-hidden="true">Music off</span>
+        <button id="musicButton" class="control-button music-button scene-music" type="button" aria-label="Sound effects and music" aria-pressed="false">
+          <span class="speaker-icon" aria-hidden="true"></span><span class="music-label" aria-hidden="true">Sound off</span>
         </button>
       </div>
     </div>
@@ -80,8 +77,8 @@
     <section class="chapter-dialog" role="dialog" aria-modal="true" aria-labelledby="dialogHeading" tabindex="-1">
       <div class="dialog-toolbar">
         <button type="button" id="closeDialog" class="control-button dialog-back" aria-label="Back to the mountain">Back to mountain</button>
-        <button id="dialogMusicButton" class="control-button music-button" type="button" aria-label="Play holiday music" aria-pressed="false">
-          <span class="speaker-icon" aria-hidden="true"></span><span class="music-label" aria-hidden="true">Music off</span>
+        <button id="dialogMusicButton" class="control-button music-button" type="button" aria-label="Sound effects and music" aria-pressed="false">
+          <span class="speaker-icon" aria-hidden="true"></span><span class="music-label" aria-hidden="true">Sound off</span>
         </button>
       </div>
       <div class="dialog-inner" id="dialogInner"></div>
