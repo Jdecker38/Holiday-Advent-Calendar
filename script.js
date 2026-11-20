@@ -54,14 +54,14 @@ const CHAPTERS = {
   1: {
     unlocked: true,
     title: 'Chapter 1',
-    guideTitle: 'The Christmas Express',
+    guideTitle: 'The Holiday Express',
     image: 'Chapter1Conductor.jpg',
-    imageDescription: 'The LEGO Christmas Express in a snowy landscape',
+    imageDescription: 'The LEGO Holiday Express in a snowy landscape',
 
     story: [
-      'Every Christmas, the employees of the LEGO Workshop gather for a very special tradition. Together, they board the candy fueled, Christmas express and begin their journey through the snowy landscape to the top of Mount “Julefest”.',
+      'Every holiday season, the employees of the LEGO Workshop gather for a very special tradition. Together, they board the candy-fueled Holiday Express and begin their journey through the snowy landscape to the top of Mount “Julefest”.',
 
-      'At the top, a magical Christmas celebration awaits, filled with lights, music, laughter, and LEGO Christmas spirit.'
+      'At the top, a magical holiday celebration awaits, filled with lights, music, laughter, and LEGO holiday spirit.'
     ],
 
     brief: 'With only 10 elements from the stock (NO REDBRICK ELEMENTS) build your own characters who will join us on this magical trip!'
@@ -217,11 +217,11 @@ document.addEventListener('keydown', event => {
 });
 
 // ==========================================
-// CHRISTMAS MUSIC
+// HOLIDAY MUSIC
 // ==========================================
 
 function updateMusicButton() {
-  const label = musicPlaying ? 'Mute Christmas music' : 'Play Christmas music';
+  const label = musicPlaying ? 'Mute holiday music' : 'Play holiday music';
   const status = musicPlaying ? 'Music on' : 'Music off';
   for (const button of [musicButton, dialogMusicButton]) {
     button.setAttribute('aria-pressed', String(musicPlaying));

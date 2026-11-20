@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#092d2c" />
-  <meta name="description" content="Holiday Advent Calendar 2026 — Three chapters, one magical Christmas journey to Mount Julefest." />
-  <title>Advent Calendar 2026 · The Christmas Express</title>
+  <meta name="theme-color" content="#701b2b" />
+  <meta name="description" content="Holiday Advent Calendar 2026 — Three chapters, one magical holiday journey to Mount Julefest." />
+  <title>Advent Calendar 2026 · The Holiday Express</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="preload" href="assets/JulefestIllustratorMobile.png" as="image" />
   <link rel="stylesheet" href="styles.css" />
@@ -14,14 +14,14 @@
 <body>
   <main class="experience" aria-label="Holiday Advent Calendar 2026">
     <div class="scene-card">
-      <div class="mountain-scene" id="mountainScene" aria-label="Illustrated snowy mountain with three chapters and a Christmas train">
-        <img class="scene-art" src="assets/JulefestIllustratorMobile.png" alt="Illustrated snowy mountain, pine trees, frozen pond, winding train tracks, and Christmas tree at its summit." />
+      <div class="mountain-scene" id="mountainScene" aria-label="Illustrated snowy mountain with three chapters and a holiday train">
+        <img class="scene-art" src="assets/JulefestIllustratorMobile.png" alt="Illustrated snowy mountain, pine trees, frozen pond, winding train tracks, and a decorated holiday tree at its summit." />
         <img class="aurora aurora-base" src="assets/JulefestAuroraSkyOverlay.png" alt="" aria-hidden="true" />
         <img class="aurora aurora-glow" src="assets/JulefestAuroraGlowOverlay.png" alt="" aria-hidden="true" />
         <img class="star-glow" id="starGlow" src="assets/JulefestStarShine01.png" alt="" aria-hidden="true" />
         <canvas id="snowCanvas" class="snow-canvas" aria-hidden="true"></canvas>
         <canvas id="trainCanvas" class="train-canvas" aria-hidden="true"></canvas>
-        <button type="button" id="trainHotspot" class="train-hotspot" aria-label="Open Chapter 1 by boarding the Christmas Express" title="Board the Christmas Express"></button>
+        <button type="button" id="trainHotspot" class="train-hotspot" aria-label="Open Chapter 1 by boarding the Holiday Express" title="Board the Holiday Express"></button>
         <h1 class="scene-title">Advent Calendar</h1>
         <button class="chapter-plaque week-one" type="button" data-chapter="1" data-state="available" aria-label="Week 1, open Chapter 1">
           <span class="chapter-marker" aria-hidden="true"></span>Week 1
@@ -32,7 +32,7 @@
         <button class="chapter-plaque week-three" type="button" data-chapter="3" data-state="locked" aria-label="Week 3, coming soon">
           <span class="chapter-marker" aria-hidden="true"></span>Week 3
         </button>
-        <button id="musicButton" class="control-button music-button scene-music" type="button" aria-label="Play Christmas music" aria-pressed="false">
+        <button id="musicButton" class="control-button music-button scene-music" type="button" aria-label="Play holiday music" aria-pressed="false">
           <span class="speaker-icon" aria-hidden="true"></span><span class="music-label" aria-hidden="true">Music off</span>
         </button>
       </div>
@@ -40,13 +40,13 @@
 
     <section class="adventure-panel" aria-labelledby="adventureHeading">
       <p class="eyebrow">The LEGO Workshop · 2026</p>
-      <h2 id="adventureHeading">All aboard the <span>Christmas Express.</span></h2>
+      <h2 id="adventureHeading">All aboard the <span>Holiday Express.</span></h2>
       <p class="lead">Three weeks. Three chapters. One magical journey to the top of Mount Julefest.</p>
       <div class="chapter-guide" aria-label="Chapter overview">
         <button class="guide-card" type="button" data-chapter="1" data-state="available">
           <span class="guide-text">
             <span class="guide-week">Week 1</span>
-            <strong class="guide-title">The Christmas Express</strong>
+            <strong class="guide-title">The Holiday Express</strong>
             <span class="guide-note">Build your character</span>
           </span>
           <span class="guide-marker" aria-hidden="true"><span class="chapter-marker"></span></span>
@@ -74,7 +74,7 @@
     <section class="chapter-dialog" role="dialog" aria-modal="true" aria-labelledby="dialogHeading" tabindex="-1">
       <div class="dialog-toolbar">
         <button type="button" id="closeDialog" class="control-button dialog-back" aria-label="Back to the mountain">Back to mountain</button>
-        <button id="dialogMusicButton" class="control-button music-button" type="button" aria-label="Play Christmas music" aria-pressed="false">
+        <button id="dialogMusicButton" class="control-button music-button" type="button" aria-label="Play holiday music" aria-pressed="false">
           <span class="speaker-icon" aria-hidden="true"></span><span class="music-label" aria-hidden="true">Music off</span>
         </button>
       </div>

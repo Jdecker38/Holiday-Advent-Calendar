@@ -1,11 +1,10 @@
 :root {
-  --night: #092d2c;
+  --night: #701b2b;
   --fir: #14372d;
   --green: #16664f;
   --red: #b91e32;
   --red-edge: #721425;
   --gold: #ffcf3c;
-  --gold-edge: #b88016;
   --snow: #fffdf6;
   --mint: #e9f2e7;
   --ink: #19332d;
@@ -22,8 +21,8 @@ body {
   color: var(--ink);
   background-color: var(--night);
   background-image:
-    radial-gradient(circle at 10px 10px, #a6d7c91a 1px, transparent 1.5px),
-    radial-gradient(ellipse at 20% 20%, #1c5148, transparent 65%);
+    radial-gradient(circle at 10px 10px, #ffd6d425 1px, transparent 1.5px),
+    radial-gradient(ellipse at 16% 12%, #a12d43, transparent 67%);
   background-size: 27px 27px, auto;
 }
 
@@ -141,8 +140,7 @@ button:focus-visible {
 }
 
 .chapter-plaque, .control-button, .guide-card {
-  --button-edge: #a4bdac;
-  box-shadow: 0 4px 0 var(--button-edge);
+  box-shadow: 0 3px 8px #19372d35;
   transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
 }
 
@@ -152,7 +150,7 @@ button:focus-visible {
 
 .chapter-plaque:active, .control-button:active, .guide-card:active {
   transform: translateY(2px);
-  box-shadow: 0 2px 0 var(--button-edge);
+  box-shadow: 0 1px 3px #19372d30;
 }
 
 :is(.chapter-plaque, .control-button, .guide-card):focus-visible {
@@ -160,7 +158,6 @@ button:focus-visible {
 }
 
 .chapter-plaque {
-  --button-edge: #0d3b31;
   position: absolute;
   z-index: 8;
   left: 50%;
@@ -182,7 +179,6 @@ button:focus-visible {
 }
 
 .chapter-plaque[data-state="available"] {
-  --button-edge: #9a5d14;
   border-color: #fff0a2;
   color: #342507;
   background: var(--gold);
@@ -202,25 +198,15 @@ button:focus-visible {
   height: 1.25rem;
 }
 
-.chapter-marker::before, .chapter-marker::after,
-.lock-icon::before, .lock-icon::after {
+.chapter-marker::after, .lock-icon::after,
+[data-state="locked"] .chapter-marker::before, .lock-icon::before {
   content: "";
   position: absolute;
 }
 
-[data-state="available"] .chapter-marker::before {
-  top: 3px;
-  left: 5px;
-  width: 4px;
-  height: 5px;
-  border-radius: 1px 1px 0 0;
-  background: currentColor;
-  box-shadow: 6px 0 currentColor;
-}
-
 [data-state="available"] .chapter-marker::after {
-  inset: 8px 2px 3px;
-  border-radius: 2px;
+  inset: 1px;
+  clip-path: polygon(50% 0, 62% 34%, 98% 36%, 70% 59%, 79% 96%, 50% 75%, 21% 96%, 30% 59%, 2% 36%, 38% 34%);
   background: currentColor;
 }
 
@@ -263,7 +249,6 @@ button:focus-visible {
 }
 
 .music-button[aria-pressed="true"] {
-  --button-edge: var(--gold-edge);
   border-color: #be8c18;
   color: #342507;
   background: var(--gold);
@@ -369,7 +354,6 @@ button:focus-visible {
 }
 
 .guide-card[data-state="available"] {
-  --button-edge: var(--gold-edge);
   grid-column: 1 / -1;
   gap: .75rem;
   padding: .87rem 1rem;
@@ -391,7 +375,7 @@ button:focus-visible {
   place-items: center;
   width: 2rem;
   aspect-ratio: 1;
-  border-radius: .4rem;
+  border-radius: 50%;
   color: #fff;
   background: var(--green);
 }
@@ -399,7 +383,6 @@ button:focus-visible {
 [data-state="available"] .guide-marker, .brief-marker {
   width: 2.65rem;
   background: var(--red);
-  box-shadow: inset 0 -3px #8d1428;
 }
 
 .chapter-overlay {
@@ -449,7 +432,6 @@ button:focus-visible {
 }
 
 .dialog-back {
-  --button-edge: #813124;
   border-color: #941628;
   color: white;
   background: var(--red);
@@ -519,7 +501,7 @@ button:focus-visible {
   text-align: center;
 }
 
-.locked-marker { width: 3rem; border-radius: .65rem; }
+.locked-marker { width: 3rem; }
 .locked-content .dialog-title { margin: .25rem 0 0; }
 .locked-content p { margin: 0; }
 .coming-soon { font-weight: 850; }
